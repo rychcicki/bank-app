@@ -1,17 +1,16 @@
 package com.example.bank.userRegister;
 
 import jakarta.persistence.Embeddable;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 
-@Getter
-@Setter
-@NoArgsConstructor
 @Embeddable
-@Builder
-@AllArgsConstructor
-@ToString
+@Data()
+@RequiredArgsConstructor    //dlaczego musi być dodatkowo @Required..., skoro jest w @Data ????
+@EqualsAndHashCode
 public class Address {
-    private String streetName;
-    private int zipCode;
-    private String city;
+    private final String streetName;
+    private final String zipCode;
+    private final String city;
 }

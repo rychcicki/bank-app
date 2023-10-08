@@ -13,45 +13,44 @@ import java.time.Period;
 public class UserService {
     private final UserRepository userRepository;
 
-    void registerUser(UserRequest userRequest) {
-        /** Czy te logi w ogóle widać??
-         * Nie widać ich ani po odpaleniu aplikacji, ani przez Postmana*/
+    User registerUser(UserRequest userRequest) {
         log.info("Start user registration.");
-        int years = Period.between(userRequest.birthDate(), LocalDate.now())
+        int years = Period.between(userRequest.getBirthDate(), LocalDate.now())
                 .getYears();
-        if (years >= 18) {
+        if (years >= 18) {  //komentarz dla mnie-doczytaj o walidacji
             User user = User.builder()
-                    .firstName(userRequest.firstName())
-                    .lastName(userRequest.lastName())
-                    .birthDate(userRequest.birthDate())
-                    .email(userRequest.email())
-                    .address(userRequest.address())
+                    .firstName(userRequest.getFirstName())
+                    .lastName(userRequest.getLastName())
+                    .birthDate(userRequest.getBirthDate())
+                    .email(userRequest.getEmail())
+                    .address(userRequest.getAddress())
                     .build();
+            userRepository.save(user);
+            return user;
         } else {
             throw new IllegalArgumentException("User have to be adult.");
         }
     }
 
-    User getUser(Long id) {
+    User getUser(Long id) throws UserNotFoundException {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("There is no user with id #" + id + " in database."));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    User updateUser(UserRequest userRequest, Long id) {
+    User updateUser(UserRequest userRequest, Long id) throws UserNotFoundException {
         User userToUpdate = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("There is no user with id #" + id + " in database."));
-        int years = Period.between(userRequest.birthDate(), LocalDate.now())
+                .orElseThrow(() -> new UserNotFoundException(id));
+        int years = Period.between(userRequest.getBirthDate(), LocalDate.now())
                 .getYears();
-        userToUpdate.setFirstName(userRequest.firstName());
-        userToUpdate.setLastName(userRequest.lastName());
+        userToUpdate.setFirstName(userRequest.getFirstName());
+        userToUpdate.setLastName(userRequest.getLastName());
         if (years >= 18) {
-            userToUpdate.setBirthDate(userRequest.birthDate());
+            userToUpdate.setBirthDate(userRequest.getBirthDate());
         } else {
-            log.info("NIE WIDAC LOGOW, NIE WIDAĆ LOGOW, NIE WIDAC LOGOW, NIE WIDAC LOGOW, NIE WIDAC LOGOW");
             throw new IllegalArgumentException("User have to be adult.");
         }
-        userToUpdate.setEmail(userRequest.email());
-        userToUpdate.setAddress(userRequest.address());
+        userToUpdate.setEmail(userRequest.getEmail());
+        userToUpdate.setAddress(userRequest.getAddress());
         return userRepository.save(userToUpdate);
     }
 

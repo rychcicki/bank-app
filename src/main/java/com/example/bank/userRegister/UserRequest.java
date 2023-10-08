@@ -1,6 +1,18 @@
 package com.example.bank.userRegister;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
 import java.time.LocalDate;
 
-record UserRequest(String firstName, String lastName, LocalDate birthDate, Address address, String email) {
+@AllArgsConstructor
+@Getter
+@Builder
+class UserRequest {
+    private final String firstName;
+    private final String lastName;
+    private final LocalDate birthDate;
+    private final Address address;
+    private final String email;
 }

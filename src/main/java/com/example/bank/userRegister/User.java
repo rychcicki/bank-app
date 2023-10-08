@@ -4,11 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 @Setter
 @Entity(name = "user")
-@Table(name = "\"USER\"")   //słowo kluczowe w postgresie??!!, inaczej nie zadziała
+@Table(name = "API_USER")
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
@@ -36,9 +37,6 @@ public class User {
             nullable = false
     )
     private String lastName;
-    @Transient
-    /** Czy jest sens wstawiania tego rodzaju pól??*/
-    private String fullName = firstName + " " + lastName;
     @Column(
             name = "birth_date",
             nullable = false
@@ -50,4 +48,17 @@ public class User {
     private String email;
     @Embedded
     private Address address;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(birthDate, user.birthDate) && Objects.equals(email, user.email) && Objects.equals(address, user.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, birthDate, email, address);
+    }
 }

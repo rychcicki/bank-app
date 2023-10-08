@@ -4,23 +4,24 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/bank")
+//@RequestMapping("/users")  //komentarz dla mnie w celu zapamiętania
 @RequiredArgsConstructor
 class UserController {
     private final UserService userService;
 
     @PostMapping("/users")
+//    @Validated  //komentarz dla mnie: walidacja -> doczytaj wszystko
     void registerUser(@RequestBody UserRequest userRequest) {
         userService.registerUser(userRequest);
     }
 
     @GetMapping("/users/{id}")
-    User getUser(@PathVariable Long id) {
+    User getUser(@PathVariable Long id) throws UserNotFoundException {
         return userService.getUser(id);
     }
 
     @PutMapping("/users")
-    User updateUser(@RequestBody UserRequest userRequest, Long id) {
+    User updateUser(@RequestBody UserRequest userRequest, Long id) throws UserNotFoundException {
         return userService.updateUser(userRequest, id);
     }
 
