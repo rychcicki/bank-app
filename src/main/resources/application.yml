@@ -12,3 +12,13 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  logging:
+    pattern:
+      console: "%msg%n"
+    level:
+      org.springframework.web: INFO
+      guru.springframework.controllers: INFO
+      org.hibernate: INFO
+server:
+  servlet:
+    context-path: /bank
