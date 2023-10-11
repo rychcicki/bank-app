@@ -156,8 +156,8 @@ apache-maven-3.9.2-bin.zip
 maven-wrapper-3.2.0.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij
-*.xml
 *.properties
 *.md
 mvnw
 *.cmd
+.idea/*.xml
