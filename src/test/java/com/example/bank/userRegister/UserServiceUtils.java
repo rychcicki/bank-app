@@ -34,8 +34,9 @@ class UserServiceUtils {
                 .build();
     }
 
-    static UserRequest userRequestBuilder() {
-        return UserRequest.builder()
+    static User userAdultBuilderWithId5() {
+        return User.builder()
+                .id(5L)
                 .firstName("Zdzislaw")
                 .lastName("Krecina")
                 .email("zdzislaw.krecina@gmail.com")
@@ -44,13 +45,27 @@ class UserServiceUtils {
                 .build();
     }
 
-    static UserRequest userBelow18RequestBuilder() {
-        return UserRequest.builder()
+    static User user18YearsOldBuilder() {
+        return User.builder()
                 .firstName("Zdzislaw")
                 .lastName("Krecina")
                 .email("zdzislaw.krecina@gmail.com")
-                .birthDate(LocalDate.of(2015, 4, 28))
+                .birthDate(LocalDate.now().minusYears(18))
                 .address(new Address("Tatrzanska", "12-456", "Zywiec"))
                 .build();
+    }
+
+    static User userNotAdultBuilder() {
+        return User.builder()
+                .firstName("Zdzislaw")
+                .lastName("Krecina")
+                .email("zdzislaw.krecina@gmail.com")
+                .birthDate(LocalDate.of(2020, 4, 28))
+                .address(new Address("Tatrzanska", "12-456", "Zywiec"))
+                .build();
+    }
+
+    static User emptyUserBuilder() {
+        return User.builder().build();
     }
 }

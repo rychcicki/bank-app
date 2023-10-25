@@ -1,139 +1,164 @@
 package com.example.bank.userRegister;
 
-
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import static com.example.bank.userRegister.UserRequestServiceUtils.*;
+import static com.example.bank.userRegister.UserServiceUtils.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//@SpringBootTest - komentarz dla mnie - nie używać tej adnotacji; ładuje cały kontekst aplikacji, czyli długo trwa!!
+//@SpringBootTest - komentarz dla mnie  nie używać tej adnotacji; ładuje cały kontekst aplikacji, czyli długo trwa!!
+
+/**
+ * Zważywszy na różne artykuły, na które trafiam, mam pytanie: który kod testować?
+ * 1. Tylko metody serwisowe
+ * 2. Tylko odpowiedzi z controller'a
+ * 3. Metody serwisowe oraz odpowiedzi z controller'a
+ */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    private static final User USER = UserServiceUtils.userBuilder();
-    private static final User USER_WITH_ID3 = UserServiceUtils.userWithId3Builder();
-    private static final User USER_TO_UPDATE = UserServiceUtils.userToUpdateBuilder();
-    private static final UserRequest USER_REQUEST = UserServiceUtils.userRequestBuilder();
-    private static final UserRequest USER_BELOW_18_REQUEST = UserServiceUtils.userBelow18RequestBuilder();
+//    private final User USER_WITH_ID3 = UserServiceUtils.userWithId3Builder();
+//    private final User USER_TO_UPDATE = UserServiceUtils.userToUpdateBuilder();
 
     @Mock
     private UserRepository userRepository;
     @InjectMocks
     private UserService userService;
 
-    @Test
-    void shouldReturnTrueIfRegisterUserPass() {
-        /** Czy to jest właściwie przetestowana metoda?
-         * Jeżeli nie chcesz tracić czasu na to, to wróćmy do tego w środę. */
-        //given - arrange
-        //when - act   //lenient() od biedy przy Unneccessary Stubbing exception
-        when(userRepository.save(USER)).thenReturn(USER); //stub
-//        userRepository.save(USER); // Jeżeli verify() jest w then-assert to jest za dużo wywołań.
-        when(userService.registerUser(USER_REQUEST)).thenReturn(USER); //stub
-        User userForTest = userService.registerUser(USER_REQUEST);
-//        //then - assert
-        verify(userRepository).save(USER);
-        /** Dlaczego poniższa linia rzuca org.mockito.exceptions.misusing.NotAMockException:
-         Argument passed to verify() is of type UserService and is not a mock! ???
-         Przecież w userService jest @InjectMocks...*/
-//        verify(userService).registerUser(USER_REQUEST);
-        Assertions.assertEquals(USER, userForTest);
-    }
-
-    @Test
-    void shouldReturnIllegalArgumentExceptionWhenAgeIsBelow18() {
+    @ParameterizedTest
+    @MethodSource("userOver18YOSource")
+    void shouldReturnUserWhenUserIs18OrOlder(User user, UserRequest userRequest) {
         //given
         //when
-//        when(userService.registerUser(USER_REQUEST)).thenThrow(new IllegalArgumentException());
+        when(userRepository.save(user)).thenReturn(user);
+        User resultUser = userService.registerUser(userRequest);
         //then
-        /** Czy może być tylko asersja w poprawnym teście??*/
+        Assertions.assertEquals(resultUser, user);
+    }
+
+    @ParameterizedTest
+    @MethodSource("userLessThan18YearsOldAndNullAndEmptySource")
+    void shouldReturnIllegalArgumentExceptionWhenAgeIsBelow18(UserRequest userRequest) {
+        //given
+        //when
+        //then
+        /** Czy może być tylko asercja w poprawnym teście??*/
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            userService.registerUser(USER_BELOW_18_REQUEST);
+            userService.registerUser(userRequest);
         }, "User has to be adult.");
     }
 
-    @Test
-    void shouldGetUserAndReturnUserFromId3() {
+    @ParameterizedTest
+    @MethodSource("userOver18YOSource")
+    void shouldGetUserAndReturnUserFromId3(User user) throws UserNotFoundException {
         //given - arrange
+        Long id = user.getId();
         //when - act
-        when(userRepository.findById(USER_WITH_ID3.getId())).thenReturn(Optional.of(USER_WITH_ID3));  //stub
-        userRepository.findById(USER_WITH_ID3.getId());  //act
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));  //stub
+        User resultUser = userService.getUser(id);//act
         //then - assert
-        verify(userRepository).findById(USER_WITH_ID3.getId());  //verify
+        Assertions.assertEquals(resultUser, user);
     }
 
-    @Test
-    void shouldReturnUserExceptionWhenThereIsNoUserWithId() {
-        //given
-        Long id = 2540L;
-        //when
-        /** Ten test nie działa.
-         * Jeżeli ta metoda zwraca Optionala, czyli NoSuchElementException, to czy w ogóle możemy wymusić
-         * rzucenie własnego wyjątku UserNotFoundException i weryfikację własnego wyjątku w asercji??
-         * Z drugiej strony przez Postmana rzuca UserNotFoundException, więc gdzie jest błąd? */
-        when(userRepository.findById(id)).thenThrow(new UserNotFoundException(id));
-//        //then
+    @ParameterizedTest
+    @MethodSource("userSource")
+    void shouldReturnUserExceptionWhenThereIsNoUserWithId(User user) throws UserNotFoundException {
+        //given - arrange
+        Long id = user.getId();
+        //when - act
+        /** W sumie to co to za test skoro dowolny user zwraca null, niezależnie od tego,
+         * czy znajduje się w db czy nie... */
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+        //then - assert
         Assertions.assertThrows(UserNotFoundException.class, () -> {
-            userRepository.findById(id);
+            userService.getUser(id);
         });
     }
 
-    /**
-     * Ten test działa z NoSuchElementException.
-     */
-    @Test
-    void shouldReturnNoSuchElementExceptionWhenThereIsNoUserWithId() {
+    @ParameterizedTest
+    @MethodSource("userOver18YOSource")
+    void shouldReturnUpdatedUser(User user, UserRequest userRequest) throws UserNotFoundException {
+        /** Nie działa dobrze - do poprawy!*/
+        //given - arrange
+        Long id = user.getId();
+        //when - act
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+//        when(userRepository.save(user));
+        user.setFirstName(userRequest.getFirstName());
+        user.setLastName(userRequest.getLastName());
+        user.setBirthDate(userRequest.getBirthDate());
+
+        when(userRepository.save(user)).thenReturn(user);
+
+        User resultUser = userService.updateUser(userRequest, user.getId());
+        user.setLastName("AABBCCCDD");
+        //then - assert
+        Assertions.assertEquals(resultUser, user);
+//        System.out.println(user);
+//        System.out.println(userRequest);
+//        verify(userRepository).save(user);
+//        verify(userRepository).findById(id);
+
+//        User resultUser = userRepository.save(USER_TO_UPDATE);
+//        User resultUser = userService.updateUser(userRequest, user.getId());
+//        verify(userService).updateUser(userRequest,user.getId());
+
+    }
+
+    @ParameterizedTest
+    @MethodSource("userSource")
+    void shouldDeleteUserWhenGivenId(User user) throws UserNotFoundException {
+        /** Kompletnie nie wiem, jak przetestować metodę z serwisu.
+         * Jak zabezpieczyć metodę, żeby nie usuwała usera, jeżeli jego ID to null.*/
         //given
-        Long id = 2540L;
+        Long id = user.getId();
         //when
-        when(userRepository.findById(id)).thenThrow(new NoSuchElementException());
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        boolean checkUser = userRepository.findById(id).isPresent();
+        userService.deleteUser(id);
+        User resultUser = userRepository.findById(id).get();
         //then
-        Assertions.assertThrows(NoSuchElementException.class, () -> {
-            userRepository.findById(id);
-        });
+        Assertions.assertTrue(checkUser);
+        verify(userRepository).delete(resultUser);
     }
 
-    @Test
-    void shouldReturnUpdatedUser() throws UserNotFoundException {
+    @ParameterizedTest
+    @MethodSource("userSource")
+    void shouldThrowUserNotFoundExceptionWhenThereIsNoUserWithId(User user) throws UserNotFoundException {
         //given
-        Long id = USER_WITH_ID3.getId();
-        //when - then
-        when(userRepository.findById(id)).thenReturn(Optional.of(USER_TO_UPDATE));
-        userRepository.findById(id);
-        verify(userRepository).findById(id);
-
-        when(userRepository.save(USER_TO_UPDATE)).thenReturn(USER_TO_UPDATE);
-        userRepository.save(USER_TO_UPDATE);
-        verify(userRepository).save(USER_TO_UPDATE);
-
-//        when(userService.updateUser(USER_REQUEST,id)).thenReturn(USER_TO_UPDATE);
-//        userService.updateUser(USER_REQUEST,id);
-        /** To samo co powyżej. Dlaczego poniższa linia rzuca org.mockito.exceptions.misusing.NotAMockException:
-         Argument passed to verify() is of type UserService and is not a mock! ???
-         Przecież w userService jest @InjectMocks...*/
-//        verify(userService).updateUser(USER_REQUEST,id);
-    }
-
-    @Test
-    void shouldReturnSthWhenUserWasDeleted() {
-        //given
-        Long id = USER_WITH_ID3.getId();
+        Long id = user.getId();
         //when
-        /** Nic tu nie pasuje. Czy nie jest tak, że metoda deleteUser(id) z serwisu powinna coś zwracać?
-         * (obecnie jest null) */
-//        when(userRepository.findById(id)).thenReturn(Optional.of(USER_WITH_ID3));
-        userRepository.deleteById(id);
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
         //then
-        verify(userRepository).deleteById(id);
-        /** To samo co powyżej. Zastanawiam się, czy testować metody CRUDowe, czy metody wewnątrz tych metod...
-         * Czy nie jest tak, że metoda deleteUser(id) z serwisu powinna coś zwraca? (obecnie jest null)*/
-//        verify(userService).deleteUser(id);
+        Assertions.assertThrows(UserNotFoundException.class, () ->
+                userService.deleteUser(id));
     }
+
+    static Stream<Arguments> userOver18YOSource() {
+        return Stream.of(Arguments.of(userAdultBuilderWithId5(), userRequestAdultBuilder()),
+                Arguments.of(user18YearsOldBuilder(), userRequest18YOBuilder()));
+    }
+
+    static Stream<UserRequest> userLessThan18YearsOldAndNullAndEmptySource() {
+        return Stream.of(userRequestNotAdultBuilder(),
+                /** Czy testy mają sprawdzać NULL i empty skoro jest walidacja??
+                 * I czy w ogóle jakoś obsługuje się tego NULL'a bo leci NullPointerException*/
+                userBelow18RequestBuilder()/*, emptyUserRequestBuilder(), null*/);
+    }
+
+    static Stream<User> userSource() {
+        return Stream.of(userBuilder(), userWithId3Builder(), userAdultBuilderWithId5(), user18YearsOldBuilder(),
+                userNotAdultBuilder()/*, emptyUserBuilder(), null*/);
+    }
+
 }
