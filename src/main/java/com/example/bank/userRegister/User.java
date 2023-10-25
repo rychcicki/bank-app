@@ -1,6 +1,8 @@
 package com.example.bank.userRegister;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -14,6 +16,9 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @ToString
+/** Czy poniższa adnotacja jest we właściwej klasie?? I czy w ogóle jest potrzebna?? Bez niej też się waliduje.*/
+
+//czy jest sens nullable = false?? przy polach @NotBlank ??
 public class User {
     @Id
     @SequenceGenerator(
@@ -31,11 +36,13 @@ public class User {
             name = "first_name",
             nullable = false
     )
+    @NotBlank(message = "firstName is mandatory")
     private String firstName;
     @Column(
             name = "last_name",
             nullable = false
     )
+    @NotBlank(message = "lastName is mandatory")
     private String lastName;
     @Column(
             name = "birth_date",
@@ -45,6 +52,8 @@ public class User {
     @Column(
             nullable = false
     )
+    @Email(message = "invalid email address")
+    @NotBlank(message = "email is mandatory")
     private String email;
     @Embedded
     private Address address;
@@ -54,7 +63,9 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(birthDate, user.birthDate) && Objects.equals(email, user.email) && Objects.equals(address, user.address);
+        return Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName)
+                && Objects.equals(birthDate, user.birthDate) && Objects.equals(email, user.email)
+                && Objects.equals(address, user.address);
     }
 
     @Override

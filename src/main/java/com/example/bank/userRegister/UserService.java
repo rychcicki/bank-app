@@ -3,6 +3,7 @@ package com.example.bank.userRegister;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -10,15 +11,16 @@ import java.time.Period;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class UserService {
     private final UserRepository userRepository;
-    private final String exceptionMessage = "User has to be adult.";
+    private final String userLessThan18YearsOldMessage = "User has to be adult.";
 
     User registerUser(UserRequest userRequest) {
         log.info("Start user's registration.");
         int years = Period.between(userRequest.getBirthDate(), LocalDate.now())
                 .getYears();
-        if (years >= 18) {  //komentarz dla mnie-doczytaj o walidacji
+        if (years >= 18) {
             User user = User.builder()
                     .firstName(userRequest.getFirstName())
                     .lastName(userRequest.getLastName())
@@ -27,22 +29,20 @@ public class UserService {
                     .address(userRequest.getAddress())
                     .build();
             userRepository.save(user);
+            log.info("User's registration passed.");
             return user;
         } else {
             log.error("User's registration failed.");
-            throw new IllegalArgumentException(exceptionMessage);
+            throw new IllegalArgumentException(userLessThan18YearsOldMessage);
         }
     }
 
-    /**
-     * Czy rzeczywiście jest w stanie rzucić inny wyjątek niż NoSuchElementException??
-     * Przez Postmana rzuca, ale dlaczego wówczas w testach jest błąd?
-     * <p>
-     * T getById(ID id) z JPA jest deprecated i zwraca generyka, a nie Optionala. Czy o nią chodziło?
-     */
     User getUser(Long id) throws UserNotFoundException {
-        return userRepository.findById(id)
+        /** Nie wiem, o co chodziło Ci w tej uwadze, żeby to inaczej obsłużyć poprzez getById... Pogadamy...*/
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
+        log.info("GetUser passed.");
+        return user;
     }
 
     User updateUser(UserRequest userRequest, Long id) throws UserNotFoundException {
@@ -55,14 +55,17 @@ public class UserService {
         if (years >= 18) {
             userToUpdate.setBirthDate(userRequest.getBirthDate());
         } else {
-            throw new IllegalArgumentException(exceptionMessage);
+            throw new IllegalArgumentException(userLessThan18YearsOldMessage);
         }
         userToUpdate.setEmail(userRequest.getEmail());
         userToUpdate.setAddress(userRequest.getAddress());
         return userRepository.save(userToUpdate);
     }
 
-    void deleteUser(Long id) {
-        userRepository.deleteById(id);
+    void deleteUser(Long id) throws UserNotFoundException {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        userRepository.delete(user);
+        log.info("User with id#" + id + " was deleted.");
     }
 }
