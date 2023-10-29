@@ -3,7 +3,6 @@ package com.example.bank.userRegister;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -11,7 +10,6 @@ import java.time.Period;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 public class UserService {
     private final UserRepository userRepository;
     private final String userLessThan18YearsOldMessage = "User has to be adult.";
@@ -38,7 +36,8 @@ public class UserService {
     }
 
     User getUser(Long id) throws UserNotFoundException {
-        /** Nie wiem, o co chodziło Ci w tej uwadze, żeby to inaczej obsłużyć poprzez getById... Pogadamy...*/
+        /** Nie wiem, o co chodziło Ci w tej uwadze, żeby to inaczej obsłużyć poprzez getById...
+         *  Może to nieistotne już...*/
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         log.info("GetUser passed.");

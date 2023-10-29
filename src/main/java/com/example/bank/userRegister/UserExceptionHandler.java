@@ -14,6 +14,9 @@ import java.util.List;
 
 @ControllerAdvice
 class UserExceptionHandler {
+    /**
+     * Czy ta klasa też ma być objęta testami, bo JACOCO wariuje...
+     */
     @ExceptionHandler(
             {UserNotFoundException.class, IllegalArgumentException.class}
     )
@@ -44,7 +47,7 @@ class UserExceptionHandler {
 
     ResponseEntity<List<String>> handleIllegalArgumentException(IllegalArgumentException exception, HttpHeaders headers,
                                                                 HttpStatus status, WebRequest request) {
-        // to samo, co w hanleUserNotFoundException
+        // to samo, co w handleUserNotFoundException
         List<String> errors = Collections.singletonList(exception.getMessage());
         return handleInternalException(exception, errors, headers, status, request);
     }

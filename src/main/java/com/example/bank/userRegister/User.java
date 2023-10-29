@@ -16,9 +16,17 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @ToString
-/** Czy poniższa adnotacja jest we właściwej klasie?? I czy w ogóle jest potrzebna?? Bez niej też się waliduje.*/
-
-//czy jest sens nullable = false?? przy polach @NotBlank ??
+/** Pytania na spotkanie:
+ * 1. Czy jest sens 'nullable = false' przy polach @NotBlank ??
+ * 2. Czy nie powinienem zmienić oznaczeń na @NotNull zamiast 'nullable = false' ??
+ *
+ * Dowiedziałem się o różnicy między 'nullable = false' i @NotNull - lepiej stosować @NotNull, gdyż:
+ * - walidacja będzie mieć miejsce, zanim Hibernate wyśle do db zapytanie SQL;
+ * - lepiej bazować na walidacji Beana niż na procesie sprawdzania poprawności przez db.
+ *  * @NotNull -> Char, Collection, Map, Array - not null but it can be empty
+ *  * @NotEmpty -> -||- - not null and greater than 0
+ *  * @NotBlank -> String - not null and TRIMMED LENGTH is greater than 0
+ * */
 public class User {
     @Id
     @SequenceGenerator(

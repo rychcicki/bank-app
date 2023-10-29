@@ -9,11 +9,13 @@ import lombok.RequiredArgsConstructor;
 @Embeddable
 @Data()
 @RequiredArgsConstructor
-/** Dlaczego musi być dodatkowo @Required..., skoro jest w @Data? */
+/** Dlaczego musi być dodatkowo @RequiredArgsConstructor, skoro jest w @Data? */
 @EqualsAndHashCode
 public class Address {
     @NotBlank
     private final String streetName;
+    @NotBlank
+    private final String streetNumber;
     @NotBlank
     private final String zipCode;
     @NotBlank

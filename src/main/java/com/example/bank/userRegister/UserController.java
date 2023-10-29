@@ -5,22 +5,25 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 //@RequestMapping("/users")  //komentarz dla mnie w celu zapamiętania
 @RequiredArgsConstructor
-/** Czy w tej klasie również ma być @Validated, skoro w parametrach metody jest @Valid??
- * Teoretycznie powinno być @Validated nad klasą, ale bez tego też działa....
- * Masz gdzieś pod ręką dobre źródło do tego? Nie mogę znaleźć dobrych przykładów ResponseEntity do PUT i DELETE. */
-@Validated
+/** Dlaczego walidacja działa niezależnie od tego, czy w metodzie POST i PUT mam @Valid, czy też go tam nie ma??
+ *
+ *     @Valid comes from Java Validation API
+ *     @Validated comes from Spring Framework Validation, it is a variant of @Valid with support for validation groups
+ *     @Valid use on method parameters and fields, don’t forget to use it on complex objects if they need to be validated
+ *     @Validated use on methods and method parameters when using validation groups,
+ *                use on classes to support method parameter constraint validations
+ *  @Validated zapewnia bardziej szczegółową kontrolę nad procesem walidacji. Umożliwia określenie grup walidacyjnych,
+ *  umożliwiając walidację różnych grup ograniczeń w różnych punktach aplikacji.*/
 class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
     @PostMapping("/users")
-//    @Validated  nad klasą, @Valid przy parametrze UserRequest
     ResponseEntity<User> registerUser(@RequestBody @Valid UserRequest userRequest) {
 //      return   ResponseEntity.accepted().body(userService.registerUser(userRequest)); // user
         return ResponseEntity.ok(userService.registerUser(userRequest));
@@ -32,7 +35,7 @@ class UserController {
     }
 
     @PutMapping("/users")
-    ResponseEntity<User> updateUser(@RequestBody UserRequest userRequest, Long id) throws UserNotFoundException {
+    ResponseEntity<User> updateUser(@RequestBody @Valid UserRequest userRequest, Long id) throws UserNotFoundException {
         return ResponseEntity.ok(userService.updateUser(userRequest, id));
     }
 
