@@ -7,9 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 @Embeddable
-@Data()
+@Data
 @RequiredArgsConstructor
-/** Dlaczego musi być dodatkowo @RequiredArgsConstructor, skoro jest w @Data? */
 @EqualsAndHashCode
 public class Address {
     @NotBlank

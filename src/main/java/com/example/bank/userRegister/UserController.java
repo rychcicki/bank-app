@@ -3,6 +3,7 @@ package com.example.bank.userRegister;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,30 +20,33 @@ import org.springframework.web.bind.annotation.*;
  *                use on classes to support method parameter constraint validations
  *  @Validated zapewnia bardziej szczegółową kontrolę nad procesem walidacji. Umożliwia określenie grup walidacyjnych,
  *  umożliwiając walidację różnych grup ograniczeń w różnych punktach aplikacji.*/
+@Slf4j
 class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
     @PostMapping("/users")
-    ResponseEntity<User> registerUser(@RequestBody @Valid UserRequest userRequest) {
-//      return   ResponseEntity.accepted().body(userService.registerUser(userRequest)); // user
+    ResponseEntity<User> registerUser(@RequestBody UserRequest userRequest) {
         return ResponseEntity.ok(userService.registerUser(userRequest));
     }
 
     @GetMapping("/users/{id}")
-    ResponseEntity<User> getUser(@PathVariable @Min(1L) Long id) throws UserNotFoundException {
+    ResponseEntity<User> getUser(@PathVariable @Min(1L) Long id) {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
     @PutMapping("/users")
-    ResponseEntity<User> updateUser(@RequestBody @Valid UserRequest userRequest, Long id) throws UserNotFoundException {
+    ResponseEntity<User> updateUser(@RequestBody UserRequest userRequest, Long id) {
         return ResponseEntity.ok(userService.updateUser(userRequest, id));
     }
 
     @DeleteMapping("/users/{id}")
-    ResponseEntity<Void> deleteUser(@PathVariable Long id) throws UserNotFoundException {
+    ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> {
+                    log.error("Error. There is no user with id #" + id + " in database.");
+                    return new UserNotFoundException("Error. There is no user with id #" + id + " in database.");
+                });
         userService.deleteUser(user.getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

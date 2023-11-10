@@ -13,9 +13,8 @@ import java.util.Objects;
 @Entity(name = "user")
 @Table(name = "API_USER")
 @NoArgsConstructor
-@Builder
+@Builder    // jak jest @Builder, to nie ma być @AllArgsConstructor
 @AllArgsConstructor
-@ToString
 /** Pytania na spotkanie:
  * 1. Czy jest sens 'nullable = false' przy polach @NotBlank ??
  * 2. Czy nie powinienem zmienić oznaczeń na @NotNull zamiast 'nullable = false' ??
