@@ -1,14 +1,16 @@
-package com.example.bank.userRegister;
+package com.example.bank.registration;
+
+import com.example.bank.registration.jpa.Address;
 
 import java.time.LocalDate;
 
 public class UserRequestServiceUtils {
-    static UserRequest emptyUserRequestBuilder() {
-        return UserRequest.builder().build();
+    static ClientRequest emptyUserRequestBuilder() {
+        return ClientRequest.builder().build();
     }
 
-    static UserRequest userRequestBelow18RequestBuilder() {
-        return UserRequest.builder()
+    static ClientRequest userRequestBelow18RequestBuilder() {
+        return ClientRequest.builder()
                 .firstName("Zdzislaw")
                 .lastName("Krecina")
                 .email("zdzislaw.krecina@gmail.com")
@@ -17,8 +19,8 @@ public class UserRequestServiceUtils {
                 .build();
     }
 
-    static UserRequest updateUserRequestAdultBuilder() {
-        return UserRequest.builder()
+    static ClientRequest updateUserRequestAdultBuilder() {
+        return ClientRequest.builder()
                 .firstName("Czeslawa")
                 .lastName("Cieslak")
                 .email("czeslawa.cieslak@gmail.com")
@@ -27,8 +29,8 @@ public class UserRequestServiceUtils {
                 .build();
     }
 
-    static UserRequest updateUserRequest18YOBuilder() {
-        return UserRequest.builder()
+    static ClientRequest updateUserRequest18YOBuilder() {
+        return ClientRequest.builder()
                 .firstName("Michal")
                 .lastName("Listkiewicz")
                 .email("michal.listkiewicz@gmail.com")
@@ -37,8 +39,8 @@ public class UserRequestServiceUtils {
                 .build();
     }
 
-    static UserRequest userRequest18YOForRegisterBuilder() {
-        return UserRequest.builder()
+    static ClientRequest userRequest18YOForRegisterBuilder() {
+        return ClientRequest.builder()
                 .firstName("Adam")
                 .lastName("Mialczysnki")
                 .email("adam.mialczynski@gmail.com")

@@ -1,10 +1,13 @@
-package com.example.bank.userRegister;
+package com.example.bank.registration;
+
+import com.example.bank.registration.jpa.Address;
+import com.example.bank.registration.jpa.Client;
 
 import java.time.LocalDate;
 
 class UserServiceUtils {
-    static User userBuilder() {
-        return User.builder()
+    static Client userBuilder() {
+        return Client.builder()
                 .firstName("Zdzislaw")
                 .lastName("Krecina")
                 .email("zdzislaw.krecina@gmail.com")
@@ -13,8 +16,8 @@ class UserServiceUtils {
                 .build();
     }
 
-    static User userWithId3Builder() {
-        return User.builder()
+    static Client userWithId3Builder() {
+        return Client.builder()
                 .id(3L)
                 .firstName("Zdzislaw")
                 .lastName("Krecina")
@@ -24,8 +27,8 @@ class UserServiceUtils {
                 .build();
     }
 
-    static User userAdultWithId5Builder() {
-        return User.builder()
+    static Client userAdultWithId5Builder() {
+        return Client.builder()
                 .id(5L)
                 .firstName("Adam")
                 .lastName("Mialczysnki")
@@ -35,8 +38,8 @@ class UserServiceUtils {
                 .build();
     }
 
-    static User user18YearsOldBuilder() {
-        return User.builder()
+    static Client user18YearsOldBuilder() {
+        return Client.builder()
                 .firstName("Adam")
                 .lastName("Malysz")
                 .email("adam.malusz@gmail.com")
@@ -45,8 +48,8 @@ class UserServiceUtils {
                 .build();
     }
 
-    static User userBelow18YearsOldBuilder() {
-        return User.builder()
+    static Client userBelow18YearsOldBuilder() {
+        return Client.builder()
                 .firstName("Zdzislaw")
                 .lastName("Krecina")
                 .email("zdzislaw.krecina@gmail.com")
@@ -55,8 +58,8 @@ class UserServiceUtils {
                 .build();
     }
 
-    static User resultUpdateUserWithId5Builder() {
-        return User.builder()
+    static Client resultUpdateUserWithId5Builder() {
+        return Client.builder()
                 .firstName("Czeslawa")
                 .lastName("Cieslak")
                 .email("czeslawa.cieslak@gmail.com")
@@ -65,8 +68,8 @@ class UserServiceUtils {
                 .build();
     }
 
-    static User resultUpdateUser18YearsOldBuilder() {
-        return User.builder()
+    static Client resultUpdateUser18YearsOldBuilder() {
+        return Client.builder()
                 .firstName("Michal")
                 .lastName("Listkiewicz")
                 .email("michal.listkiewicz@gmail.com")
@@ -75,8 +78,8 @@ class UserServiceUtils {
                 .build();
     }
 
-    static User resultOfRegisterUserAdultWithIdBuilder() {
-        return User.builder()
+    static Client resultOfRegisterUserAdultWithIdBuilder() {
+        return Client.builder()
                 .id(5L)
                 .firstName("Adam")
                 .lastName("Mialczysnki")
@@ -84,9 +87,5 @@ class UserServiceUtils {
                 .birthDate(LocalDate.of(1956, 11, 11))
                 .address(new Address("Mickiewicza", "13A/3", "00-914", "Warszawa"))
                 .build();
-    }
-
-    static User emptyUserBuilder() {
-        return User.builder().build();
     }
 }

@@ -1,5 +1,8 @@
-package com.example.bank.userRegister;
+package com.example.bank.registration;
 
+import com.example.bank.exception.UserNotFoundException;
+import com.example.bank.registration.jpa.User;
+import com.example.bank.registration.jpa.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,19 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.example.bank.userRegister.UserRequestServiceUtils.*;
-import static com.example.bank.userRegister.UserServiceUtils.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static com.example.bank.registration.UserRequestServiceUtils.*;
+import static com.example.bank.registration.UserServiceUtils.*;
+import static org.mockito.Mockito.*;
 
-//@SpringBootTest - komentarz dla mnie  nie używać tej adnotacji; ładuje cały kontekst aplikacji, czyli długo trwa!!
-
-/**
- * Czy testy mają sprawdzać NULL i empty skoro jest walidacja ??
- * I czy w ogóle jakoś obsługuje się tego NULL'a, bo jeżeli przekażemy go do metod CRUDowych,
- * to leci NullPointerException.
- * Jak na razie dane do testów typu EMPTY lub NULL są zakomentowane.
- */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
@@ -36,7 +30,7 @@ class UserServiceTest {
     @DisplayName("A parameterized test of registerUser() method")
     @ParameterizedTest
     @MethodSource("userOver18YearsOldSource")
-    void shouldReturnUserWhenUserIsBetween18And119YearsOld(User user, UserRequest userRequest) {
+    void shouldReturnUserWhenUserIs18YearsOldOrMore(User user, UserRequest userRequest) {
         when(userRepository.save(user)).thenReturn(user);
         User resultUser = userService.registerUser(userRequest);
         Assertions.assertEquals(resultUser, user);
@@ -44,8 +38,8 @@ class UserServiceTest {
 
     @DisplayName("A parameterized test of registerUser() method")
     @ParameterizedTest
-    @MethodSource("userRequestBelow18YearsOldAndNullAndEmptySource")
-    void shouldReturnIllegalArgumentExceptionWhenAgeIsBetween18And119(UserRequest userRequest) {
+    @MethodSource("userRequestBelow18YearsOldSource")
+    void shouldReturnIllegalArgumentExceptionWhenAgeIsBelow18YearsOld(UserRequest userRequest) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             userService.registerUser(userRequest);
         }, "User has to be adult.");
@@ -54,7 +48,7 @@ class UserServiceTest {
     @DisplayName("A parameterized test of getUser() method")
     @ParameterizedTest
     @MethodSource("userOver18YearsOldSource")
-    void shouldGetUserAndReturnUserFromId3(User user) throws UserNotFoundException {
+    void shouldGetUserAndReturnUserWithId(User user) {
         Long id = user.getId();
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         User resultUser = userService.getUser(id);
@@ -75,46 +69,51 @@ class UserServiceTest {
     @DisplayName("A parameterized test of updateUser() method")
     @ParameterizedTest
     @MethodSource("userOver18YearsOldUpdateSource")
-    void shouldReturnUpdatedUser(User user, UserRequest userRequest, User updatedUser) throws UserNotFoundException {
-        Long id = user.getId();
+    void shouldReturnUpdatedUser(User user, UserRequest userRequest, User updatedUser) {
+        Long id = userRequest.id();
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
-        User resultUser = userService.updateUser(userRequest, user.getId());
+        User resultUser = userService.updateUser(userRequest);
+        /** Michał: Jakos srednio mi sie podoba kwestia ze sa 2 parametry w tej metodzie. Bo to glupio wyglada ze masz
+         * userRequest i jeszcze dopychasz ID zamiast miec je od razu w obiekcie requesta
+         *
+         * Skorygowano w userReqest, userService i teście.*/
         Assertions.assertEquals(updatedUser, resultUser);
     }
 
     @DisplayName("A parameterized test of updateUser() method")
     @ParameterizedTest
-    @MethodSource("userOver18YearsOldSource")
-    void shouldThrowUserNotFoundExceptionDuringUserUpdateWhenThereIsNoUserWithId(User user, UserRequest userRequest) {
-        Long id = user.getId();
+    @MethodSource("userRequestOver18YearsOldSource")
+    void shouldThrowUserNotFoundExceptionDuringUserUpdateWhenThereIsNoUserWithId(UserRequest userRequest) {
+        Long id = userRequest.id();
         when(userRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(UserNotFoundException.class, () ->
-                userService.updateUser(userRequest, id));
+                userService.updateUser(userRequest));
     }
 
     @DisplayName("A parameterized test of updateUser() method")
     @ParameterizedTest
     @MethodSource("userBelow18YearsOldSource")
-    void shouldThrowIllegalArgumentExceptionDuringUserUpdateWhenTheUserIsNotAdult(User user, UserRequest userRequest) {
+    void shouldThrowIllegalArgumentExceptionDuringUserUpdateWhenTheUserIsBelow18YearsOld(User user,
+                                                                                         UserRequest userRequest) {
         Long id = user.getId();
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                userService.updateUser(userRequest, id));
+                userService.updateUser(userRequest));
     }
 
     @DisplayName("A parameterized test of deleteUser() method")
     @ParameterizedTest
     @MethodSource("userSource")
-    void shouldDeleteUserWhenGivenId(User user) throws UserNotFoundException {
-        /** Czy na tym etapie można jakoś łatwo zabezpieczyć metodę, żeby nie usuwała usera, jeżeli jego ID to null?? */
+    void shouldDeleteUserWhenGivenId(User user) {
         Long id = user.getId();
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
-        boolean checkUser = userRepository.findById(id).isPresent();
+        doNothing().when(userRepository).delete(user);
         userService.deleteUser(id);
-        User resultUser = userRepository.findById(id).get();
-        Assertions.assertTrue(checkUser);
-        verify(userRepository).delete(resultUser);
+        verify(userRepository).delete(user);
+        /** Michał: co tu sie w ogole dzieje ? Wywolywanie metod w testach z kodu produkcyjnego ? Co to w ogole jest?
+         *
+         * Skorygowano do takiej postaci. */
     }
 
     @DisplayName("A parameterized test of deleteUser() method")
@@ -127,19 +126,18 @@ class UserServiceTest {
                 userService.deleteUser(id));
     }
 
-    static Stream<Arguments> userBelow18YearsOldSource/*AndEmptySource*/() {
-        return Stream.of(Arguments.of(userBelow18YearsOldBuilder(), userRequestBelow18RequestBuilder())/*,
-                Arguments.of(emptyUserBuilder(), emptyUserRequestBuilder())*/);
+    static Stream<Arguments> userBelow18YearsOldSource() {
+        return Stream.of(Arguments.of(userBelow18YearsOldBuilder(), userRequestBelow18RequestBuilder()));
     }
 
-    static Stream<UserRequest> userRequestBelow18YearsOldAndNullAndEmptySource() {
+    static Stream<UserRequest> userRequestBelow18YearsOldSource() {
         return Stream.of(userRequestBelow18RequestBuilder()
-                /*, emptyUserRequestBuilder(), null*/);
+        );
     }
 
     static Stream<User> userSource() {
         return Stream.of(userBuilder(), userWithId3Builder(), userAdultWithId5Builder(), user18YearsOldBuilder(),
-                userBelow18YearsOldBuilder()/*, emptyUserBuilder(), null*/);
+                userBelow18YearsOldBuilder());
     }
 
     static Stream<Arguments> userOver18YearsOldUpdateSource() {
@@ -151,7 +149,10 @@ class UserServiceTest {
 
     static Stream<Arguments> userOver18YearsOldSource() {
         return Stream.of(Arguments.of(userAdultWithId5Builder(), userRequest18YOForRegisterBuilder(),
-                resultOfRegisterUserAdultWithIdBuilder())/*,
-                Arguments.of(user18YearsOldBuilder(), updateUserRequest18YOBuilder(), resultUpdateUser18YearsOldBuilder())*/);
+                resultOfRegisterUserAdultWithIdBuilder()));
+    }
+    static Stream<Arguments> userRequestOver18YearsOldSource() {
+        return Stream.of(Arguments.of(userRequest18YOForRegisterBuilder(),
+                resultOfRegisterUserAdultWithIdBuilder()));
     }
 }
