@@ -5,87 +5,53 @@ import com.example.bank.registration.jpa.Client;
 
 import java.time.LocalDate;
 
-class UserServiceUtils {
-    static Client userBuilder() {
-        return Client.builder()
-                .firstName("Zdzislaw")
-                .lastName("Krecina")
-                .email("zdzislaw.krecina@gmail.com")
-                .birthDate(LocalDate.of(1954, 4, 28))
-                .address(new Address("Tatrzanska", "7B", "12-456", "Zywiec"))
-                .build();
+class ClientServiceUtils {
+    static Client clientBuilder() {
+        return new Client(null, "Zdzislaw", "Krecina",
+                LocalDate.of(1954, 4, 28), "zdzislaw.krecina@gmail.com",
+                new Address("Tatrzanska", "7B", "12-456", "Zywiec"));
     }
 
-    static Client userWithId3Builder() {
-        return Client.builder()
-                .id(3L)
-                .firstName("Zdzislaw")
-                .lastName("Krecina")
-                .email("zdzislaw.krecina@gmail.com")
-                .birthDate(LocalDate.of(1954, 4, 28))
-                .address(new Address("Tatrzanska", "7B", "12-456", "Zywiec"))
-                .build();
+    static Client clientWithId3Builder() {
+        return new Client(3L, "Zdzislaw", "Krecina",
+                LocalDate.of(1954, 4, 28), "zdzislaw.krecina@gmail.com",
+                new Address("Tatrzanska", "7B", "12-456", "Zywiec"));
     }
 
-    static Client userAdultWithId5Builder() {
-        return Client.builder()
-                .id(5L)
-                .firstName("Adam")
-                .lastName("Mialczysnki")
-                .email("adam.mialczynski@gmail.com")
-                .birthDate(LocalDate.of(1956, 11, 11))
-                .address(new Address("Mickiewicza", "13A/3", "00-914", "Warszawa"))
-                .build();
+    static Client clientAdultWithId5Builder() {
+        return new Client(5L, "Adam", "Mialczynski",
+                LocalDate.of(1956, 11, 11), "adam.mialczynski@gmail.com",
+                new Address("Mickiewicza", "13A/3", "00-914", "Warszawa"));
     }
 
-    static Client user18YearsOldBuilder() {
-        return Client.builder()
-                .firstName("Adam")
-                .lastName("Malysz")
-                .email("adam.malusz@gmail.com")
-                .birthDate(LocalDate.now().minusYears(18))
-                .address(new Address("Polanska", "102", "33-450", "Ustron"))
-                .build();
+    static Client client18YearsOldBuilder() {
+        return new Client(null, "Adam", "Malysz", LocalDate.now().minusYears(18),
+                "adam.malusz@gmail.com",
+                new Address("Polanska", "102", "33-450", "Ustron"));
     }
 
-    static Client userBelow18YearsOldBuilder() {
-        return Client.builder()
-                .firstName("Zdzislaw")
-                .lastName("Krecina")
-                .email("zdzislaw.krecina@gmail.com")
-                .birthDate(LocalDate.now().minusYears(18))
-                .address(new Address("Tatrzanska", "7B", "12-456", "Zywiec"))
-                .build();
+    static Client clientBelow18YearsOldBuilder() {
+        return new Client(null, "Zdzislaw", "Krecina", LocalDate.now().minusYears(18),
+                "zdzislaw.krecina@gmail.com",
+                new Address("Tatrzanska", "7B", "12-456", "Zywiec"));
     }
 
-    static Client resultUpdateUserWithId5Builder() {
-        return Client.builder()
-                .firstName("Czeslawa")
-                .lastName("Cieslak")
-                .email("czeslawa.cieslak@gmail.com")
-                .birthDate(LocalDate.of(1938, 6, 10))
-                .address(new Address("Obroncow Warszawy", "31", "57-343", "Lewin Klodzki"))
-                .build();
+    static Client resultUpdateClientWithId5Builder() {
+        return new Client(null, "Czeslawa", "Cieslak",
+                LocalDate.of(1938, 6, 10), "czeslawa.cieslak@gmail.com",
+                new Address("Obroncow Warszawy", "31", "57-343",
+                        "Lewin Klodzki"));
     }
 
-    static Client resultUpdateUser18YearsOldBuilder() {
-        return Client.builder()
-                .firstName("Michal")
-                .lastName("Listkiewicz")
-                .email("michal.listkiewicz@gmail.com")
-                .birthDate(LocalDate.now().minusYears(18))
-                .address(new Address("Ku Ujsciu", "1", "67-890", "Gdynia"))
-                .build();
+    static Client resultUpdateClient18YearsOldBuilder() {
+        return new Client(null, "Michal", "Listkiewicz",
+                LocalDate.now().minusYears(18), "michal.listkiewicz@gmail.com",
+                new Address("Ku Ujsciu", "1", "67-890", "Gdynia"));
     }
 
-    static Client resultOfRegisterUserAdultWithIdBuilder() {
-        return Client.builder()
-                .id(5L)
-                .firstName("Adam")
-                .lastName("Mialczysnki")
-                .email("adam.mialczynski@gmail.com")
-                .birthDate(LocalDate.of(1956, 11, 11))
-                .address(new Address("Mickiewicza", "13A/3", "00-914", "Warszawa"))
-                .build();
+    static Client resultOfRegisterClientAdultWithIdBuilder() {
+        return new Client(5L, "Adam", "Mialczynski",
+                LocalDate.of(1956, 11, 11), "adam.mialczynski@gmail.com",
+                new Address("Mickiewicza", "13A/3", "00-914", "Warszawa"));
     }
 }
