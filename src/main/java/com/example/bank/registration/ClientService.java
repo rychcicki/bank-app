@@ -5,6 +5,7 @@ import com.example.bank.registration.jpa.Client;
 import com.example.bank.registration.jpa.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,12 +17,15 @@ import java.time.Period;
 public class ClientService {
     private final ClientRepository clientRepository;
     private final String clientLessThan18YearsOldMessage = "Client has to be adult.";
+    private final String noClientInDatabaseMessage = "Error. There is no client with id #";
+    @Value("${age.of.majority}")
+    private int majority;
 
     Client registerClient(ClientRequest clientRequest) {
         log.info("Start client's registration.");
         int years = Period.between(clientRequest.birthDate(), LocalDate.now())
                 .getYears();
-        if (years >= 18) {
+        if (years >= majority) {
             Client client = new Client(clientRequest.id(), clientRequest.firstName(), clientRequest.lastName(),
                     clientRequest.birthDate(), clientRequest.email(), clientRequest.address());
             clientRepository.save(client);
@@ -33,13 +37,13 @@ public class ClientService {
         }
     }
 
-    Client getClient(Long id) {
+    Client getClientById(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Error. There is no client with id #" + id + " in database.");
-                    return new ClientNotFoundException("Error. There is no client with id #" + id + " in database.");
+                    log.error(noClientInDatabaseMessage + id);
+                    return new ClientNotFoundException(noClientInDatabaseMessage + id);
                 });
-        log.info("GetClient passed.");
+        log.info("GetClientById passed.");
         return client;
     }
 
@@ -47,14 +51,14 @@ public class ClientService {
         Long id = clientRequest.id();
         Client clientToUpdate = clientRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Error. There is no client with id #" + id + " in database.");
-                    return new ClientNotFoundException("Error. There is no client with id #" + id + " in database.");
+                    log.error(noClientInDatabaseMessage + id);
+                    return new ClientNotFoundException(noClientInDatabaseMessage + id);
                 });
         int years = Period.between(clientRequest.birthDate(), LocalDate.now())
                 .getYears();
         clientToUpdate.setFirstName(clientRequest.firstName());
         clientToUpdate.setLastName(clientRequest.lastName());
-        if (years >= 18) {
+        if (years >= majority) {
             clientToUpdate.setBirthDate(clientRequest.birthDate());
         } else {
             throw new IllegalArgumentException(clientLessThan18YearsOldMessage);
@@ -67,8 +71,8 @@ public class ClientService {
     void deleteClient(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Error. There is no client with id #" + id + " in database.");
-                    return new ClientNotFoundException("Error. There is no client with id #" + id + " in database.");
+                    log.error(noClientInDatabaseMessage + id);
+                    return new ClientNotFoundException(noClientInDatabaseMessage + id);
                 });
         clientRepository.delete(client);
         log.info("Client with id#" + id + " was deleted.");

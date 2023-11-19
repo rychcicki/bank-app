@@ -51,7 +51,7 @@ class ClientServiceTest {
     void shouldGetClientAndReturnClientWithId(Client client) {
         Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
-        Client resultClient = clientService.getClient(id);
+        Client resultClient = clientService.getClientById(id);
         Assertions.assertEquals(resultClient, client);
     }
 
@@ -62,7 +62,7 @@ class ClientServiceTest {
         Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(ClientNotFoundException.class, () -> {
-            clientService.getClient(id);
+            clientService.getClientById(id);
         });
     }
 
@@ -74,10 +74,6 @@ class ClientServiceTest {
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
         when(clientRepository.save(client)).thenReturn(client);
         Client resultClient = clientService.updateClient(clientRequest);
-        /** 8) Michał: Jakos srednio mi sie podoba kwestia ze sa 2 parametry w tej metodzie. Bo to glupio wyglada ze masz
-         * clientRequest i jeszcze dopychasz ID zamiast miec je od razu w obiekcie requesta
-         *
-         * Skorygowano w clientReqest, clientService i teście.*/
         Assertions.assertEquals(updatedClient, resultClient);
     }
 
@@ -112,12 +108,6 @@ class ClientServiceTest {
         doNothing().when(clientRepository).delete(client);
         clientService.deleteClient(id);
         verify(clientRepository, times(1)).delete(client);
-        /** 9) Michał: co tu sie w ogole dzieje ? Wywolywanie metod w testach z kodu produkcyjnego ? Co to w ogole jest?
-         *
-         * Skorygowano do takiej postaci.
-         *
-         * 10) Dodałem do POMa <exclude>com.example.bank/exception/GlobalExceptionHandler.class</exclude>>
-         * ale dalej Jacoco sprawdza klasę GlobalExceptionHandler, zamiast ją ominąć.*/
     }
 
     @DisplayName("A parameterized test of deleteClient() method")

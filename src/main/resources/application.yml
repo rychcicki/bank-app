@@ -22,3 +22,6 @@ spring:
 server:
   servlet:
     context-path: /bank
+age:
+  of:
+    majority: 18
