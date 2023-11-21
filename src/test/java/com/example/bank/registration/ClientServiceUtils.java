@@ -31,8 +31,8 @@ class ClientServiceUtils {
     }
 
     static Client clientBelow18YearsOldBuilder() {
-        return new Client(null, "Zdzislaw", "Krecina", LocalDate.now().minusYears(18),
-                "zdzislaw.krecina@gmail.com",
+        return new Client(null, "Zdzislaw", "Krecina",
+                LocalDate.of(2015, 4, 28), "zdzislaw.krecina@gmail.com",
                 new Address("Tatrzanska", "7B", "12-456", "Zywiec"));
     }
 

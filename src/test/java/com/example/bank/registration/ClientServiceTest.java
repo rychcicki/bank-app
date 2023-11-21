@@ -7,17 +7,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import static com.example.bank.registration.ClientRequestServiceUtils.*;
-import static com.example.bank.registration.ClientServiceUtils.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +25,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of registerClient() method")
     @ParameterizedTest
-    @MethodSource("clientOver18YearsOldSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientOver18YearsOldSource")
     void shouldReturnClientWhenClientIs18YearsOldOrMore(Client client, ClientRequest clientRequest) {
         when(clientRepository.save(client)).thenReturn(client);
         Client resultClient = clientService.registerClient(clientRequest);
@@ -38,7 +34,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of registerClient() method")
     @ParameterizedTest
-    @MethodSource("clientRequestBelow18YearsOldSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientRequestBelow18YearsOldSource")
     void shouldReturnIllegalArgumentExceptionWhenAgeIsBelow18YearsOld(ClientRequest clientRequest) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             clientService.registerClient(clientRequest);
@@ -47,7 +43,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of getClient() method")
     @ParameterizedTest
-    @MethodSource("clientOver18YearsOldSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientOver18YearsOldSource")
     void shouldGetClientAndReturnClientWithId(Client client) {
         Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
@@ -57,7 +53,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of getClient() method")
     @ParameterizedTest
-    @MethodSource("clientSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientSource")
     void shouldReturnClientExceptionWhenThereIsNoClientWithId(Client client) {
         Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.empty());
@@ -68,7 +64,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of updateClient() method")
     @ParameterizedTest
-    @MethodSource("clientOver18YearsOldUpdateSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientOver18YearsOldUpdateSource")
     void shouldReturnUpdatedClient(Client client, ClientRequest clientRequest, Client updatedClient) {
         Long id = clientRequest.id();
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
@@ -79,7 +75,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of updateClient() method")
     @ParameterizedTest
-    @MethodSource("clientRequestOver18YearsOldSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientRequestOver18YearsOldSource")
     void shouldThrowClientNotFoundExceptionDuringClientUpdateWhenThereIsNoClientWithId(ClientRequest clientRequest) {
         Long id = clientRequest.id();
         when(clientRepository.findById(id)).thenReturn(Optional.empty());
@@ -89,7 +85,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of updateClient() method")
     @ParameterizedTest
-    @MethodSource("clientBelow18YearsOldSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientBelow18YearsOldSource")
     void shouldThrowIllegalArgumentExceptionDuringClientUpdateWhenTheClientIsBelow18YearsOld(
             Client client,
             ClientRequest clientRequest) {
@@ -101,7 +97,7 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of deleteClient() method")
     @ParameterizedTest
-    @MethodSource("clientSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientSource")
     void shouldDeleteClientWhenGivenId(Client client) {
         Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
@@ -112,42 +108,11 @@ class ClientServiceTest {
 
     @DisplayName("A parameterized test of deleteClient() method")
     @ParameterizedTest
-    @MethodSource("clientSource")
+    @MethodSource("com.example.bank.registration.SourceMethodsForTest#clientSource")
     void shouldThrowClientNotFoundExceptionWhenThereIsNoClientWithId(Client client) {
         Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(ClientNotFoundException.class, () ->
                 clientService.deleteClient(id));
-    }
-
-    static Stream<Arguments> clientBelow18YearsOldSource() {
-        return Stream.of(Arguments.of(clientBelow18YearsOldBuilder(), clientRequestBelow18RequestBuilder()));
-    }
-
-    static Stream<ClientRequest> clientRequestBelow18YearsOldSource() {
-        return Stream.of(clientRequestBelow18RequestBuilder()
-        );
-    }
-
-    static Stream<Client> clientSource() {
-        return Stream.of(clientBuilder(), clientWithId3Builder(), clientAdultWithId5Builder(),
-                client18YearsOldBuilder(), clientBelow18YearsOldBuilder());
-    }
-
-    static Stream<Arguments> clientOver18YearsOldUpdateSource() {
-        return Stream.of(Arguments.of(clientAdultWithId5Builder(), updateClientRequestAdultBuilder(),
-                        resultUpdateClientWithId5Builder()),
-                Arguments.of(client18YearsOldBuilder(), updateClientRequest18YOBuilder(),
-                        resultUpdateClient18YearsOldBuilder()));
-    }
-
-    static Stream<Arguments> clientOver18YearsOldSource() {
-        return Stream.of(Arguments.of(clientAdultWithId5Builder(), clientRequest18YOForRegisterBuilder(),
-                resultOfRegisterClientAdultWithIdBuilder()));
-    }
-
-    static Stream<Arguments> clientRequestOver18YearsOldSource() {
-        return Stream.of(Arguments.of(clientRequest18YOForRegisterBuilder(),
-                resultOfRegisterClientAdultWithIdBuilder()));
     }
 }

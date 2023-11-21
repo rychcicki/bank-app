@@ -17,8 +17,9 @@ import java.time.Period;
 public class ClientService {
     private final ClientRepository clientRepository;
     private final String clientLessThan18YearsOldMessage = "Client has to be adult.";
-    private final String noClientInDatabaseMessage = "Error. There is no client with id #";
-    @Value("${age.of.majority}")
+    private final String noClientInDatabaseExceptionMessage = "Error. There is no client in database.";
+    private final String noClientInDatabaseLogMessage = "There is no client with id #";
+    @Value("${age-of-majority}")
     private int majority;
 
     Client registerClient(ClientRequest clientRequest) {
@@ -40,8 +41,8 @@ public class ClientService {
     Client getClientById(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error(noClientInDatabaseMessage + id);
-                    return new ClientNotFoundException(noClientInDatabaseMessage + id);
+                    log.error(noClientInDatabaseLogMessage + id);
+                    return new ClientNotFoundException(noClientInDatabaseExceptionMessage);
                 });
         log.info("GetClientById passed.");
         return client;
@@ -51,8 +52,8 @@ public class ClientService {
         Long id = clientRequest.id();
         Client clientToUpdate = clientRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error(noClientInDatabaseMessage + id);
-                    return new ClientNotFoundException(noClientInDatabaseMessage + id);
+                    log.error(noClientInDatabaseLogMessage + id);
+                    return new ClientNotFoundException(noClientInDatabaseExceptionMessage);
                 });
         int years = Period.between(clientRequest.birthDate(), LocalDate.now())
                 .getYears();
@@ -71,8 +72,8 @@ public class ClientService {
     void deleteClient(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error(noClientInDatabaseMessage + id);
-                    return new ClientNotFoundException(noClientInDatabaseMessage + id);
+                    log.error(noClientInDatabaseLogMessage + id);
+                    return new ClientNotFoundException(noClientInDatabaseExceptionMessage);
                 });
         clientRepository.delete(client);
         log.info("Client with id#" + id + " was deleted.");
