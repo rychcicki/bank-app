@@ -1,15 +1,13 @@
-package com.example.bank.userRegister;
+package com.example.bank.registration.jpa;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 @Embeddable
 @Data
 @RequiredArgsConstructor
-@EqualsAndHashCode
 public class Address {
     @NotBlank
     private final String streetName;

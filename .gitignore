@@ -161,3 +161,4 @@ maven-wrapper-3.2.0.jar
 mvnw
 *.cmd
 .idea/*.xml
+.idea/inspectionProfiles/Project_Default.xml
