@@ -1,20 +1,27 @@
 package com.example.bank.registration.jpa;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Embeddable
 @Data
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Address {
     @NotBlank
-    private final String streetName;
+    @Column
+    private String streetName;
     @NotBlank
-    private final String streetNumber;
+    @Column
+    private String streetNumber;
     @NotBlank
-    private final String zipCode;
+    @Column
+    private String zipCode;
     @NotBlank
-    private final String city;
+    @Column
+    private String city;
 }

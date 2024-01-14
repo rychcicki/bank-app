@@ -1,11 +1,11 @@
 spring:
-  profiles:
-    active: usa
   datasource:
     url: jdbc:postgresql://localhost/marcin
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+  main:
+    allow-bean-definition-overriding: true
   jpa:
     properties:
       format_sql: true
@@ -13,7 +13,7 @@ spring:
     database-platform: PostgreSQL
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+    show-sql: false
   logging:
     pattern:
       console: "%msg%n"
@@ -24,4 +24,7 @@ spring:
 server:
   servlet:
     context-path: /bank
-age-of-majority: 18
+age-of-majority: 21
+#springdoc:
+#  swagger-ui:
+#    path: /swagger-something.html

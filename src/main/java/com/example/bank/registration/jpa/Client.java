@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Entity(name = "client")
-@Table(name = "client")
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -19,7 +18,7 @@ public class Client {
     @Id
     @SequenceGenerator(name = "client_sequence", sequenceName = "client_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_sequence")
-    @Column(name = "id", nullable = false)
+    @Column(nullable = false)
     @EqualsAndHashCode.Exclude
     private Long id;
     @Column(name = "first_name", nullable = false)
