@@ -1,14 +1,18 @@
 package com.example.bank.registration.jpa;
 
+import com.example.bank.account.Account;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Negative;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity(name = "client")
 @Table(name = "client")
@@ -19,11 +23,10 @@ public class Client {
     @Id
     @SequenceGenerator(name = "client_sequence", sequenceName = "client_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_sequence")
-    @Column(name = "id", nullable = false)
-    @EqualsAndHashCode.Exclude
+    @Column(nullable = false)
     private Long id;
+    @NotEmpty
     @Column(name = "first_name", nullable = false)
-    @NotBlank(message = "firstName is mandatory")
     private String firstName;
     @Column(name = "last_name", nullable = false)
     @NotBlank(message = "lastName is mandatory")
@@ -36,4 +39,6 @@ public class Client {
     private String email;
     @Embedded
     private Address address;
+//    @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+//    List<Account> account;
 }
