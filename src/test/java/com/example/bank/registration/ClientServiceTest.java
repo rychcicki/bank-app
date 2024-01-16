@@ -4,6 +4,7 @@ import com.example.bank.exception.ClientNotFoundException;
 import com.example.bank.registration.jpa.Client;
 import com.example.bank.registration.jpa.ClientRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,11 @@ class ClientServiceTest {
     private ClientRepository clientRepository;
     @InjectMocks
     private ClientService clientService;
+
+    @BeforeEach
+    public void beforeEach() {
+        clientService.setMajority(21);
+    }
 
     @DisplayName("A parameterized test of registerClient() method")
     @ParameterizedTest

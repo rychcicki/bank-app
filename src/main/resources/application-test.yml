@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: usa
   datasource:
     url: jdbc:postgresql://localhost/marcin
     username: postgres
@@ -13,7 +11,7 @@ spring:
     database-platform: PostgreSQL
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+    show-sql: false
   logging:
     pattern:
       console: "%msg%n"

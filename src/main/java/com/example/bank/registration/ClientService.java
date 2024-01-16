@@ -3,7 +3,10 @@ package com.example.bank.registration;
 import com.example.bank.exception.ClientNotFoundException;
 import com.example.bank.registration.jpa.Client;
 import com.example.bank.registration.jpa.ClientRepository;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,13 +23,15 @@ public class ClientService {
     private final String noClientInDatabaseExceptionMessage = "Error. There is no client in database.";
     private final String noClientInDatabaseLogMessage = "There is no client with id #";
     @Value("${age-of-majority}")
-    private int majority;
+    @Getter
+    @Setter(AccessLevel.PACKAGE) // only for testing
+    private Integer majority;
 
     Client registerClient(ClientRequest clientRequest) {
         log.info("Start client's registration.");
         int years = Period.between(clientRequest.birthDate(), LocalDate.now())
                 .getYears();
-        if (years >= majority) {
+        if (years >= getMajority()) {
             Client client = new Client(clientRequest.id(), clientRequest.firstName(), clientRequest.lastName(),
                     clientRequest.birthDate(), clientRequest.email(), clientRequest.address());
             clientRepository.save(client);
@@ -45,6 +50,7 @@ public class ClientService {
                     return new ClientNotFoundException(noClientInDatabaseExceptionMessage);
                 });
         log.info("GetClientById passed.");
+        log.info(client.toString());
         return client;
     }
 
@@ -59,7 +65,7 @@ public class ClientService {
                 .getYears();
         clientToUpdate.setFirstName(clientRequest.firstName());
         clientToUpdate.setLastName(clientRequest.lastName());
-        if (years >= majority) {
+        if (years >= getMajority()) {
             clientToUpdate.setBirthDate(clientRequest.birthDate());
         } else {
             throw new IllegalArgumentException(clientLessThan18YearsOldMessage);

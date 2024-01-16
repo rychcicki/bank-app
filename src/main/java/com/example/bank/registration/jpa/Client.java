@@ -14,8 +14,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity(name = "client")
-@Table(name = "client")
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -24,6 +23,7 @@ public class Client {
     @SequenceGenerator(name = "client_sequence", sequenceName = "client_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_sequence")
     @Column(nullable = false)
+    @EqualsAndHashCode.Exclude
     private Long id;
     @NotEmpty
     @Column(name = "first_name", nullable = false)
@@ -39,6 +39,6 @@ public class Client {
     private String email;
     @Embedded
     private Address address;
-//    @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-//    List<Account> account;
+    @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    List<Account> account;
 }
