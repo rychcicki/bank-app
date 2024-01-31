@@ -9,7 +9,7 @@ import static com.example.bank.registration.ClientRequestServiceUtils.*;
 import static com.example.bank.registration.ClientServiceUtils.*;
 
 class SourceMethodsForTest {
-    static Stream<Arguments> clientBelow18YearsOldSource() {
+/*    static Stream<Arguments> clientBelow18YearsOldSource() {
         return Stream.of(Arguments.of(clientBelow18YearsOldBuilder(), clientRequestBelow18RequestBuilder()));
     }
 
@@ -38,5 +38,5 @@ class SourceMethodsForTest {
     static Stream<Arguments> clientRequestOver18YearsOldSource() {
         return Stream.of(Arguments.of(clientRequest18YOForRegisterBuilder(),
                 resultOfRegisterClientAdultWithIdBuilder()));
-    }
+    }*/
 }

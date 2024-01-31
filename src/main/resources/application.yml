@@ -1,11 +1,13 @@
 spring:
-  profiles:
-    active: usa
+#  profiles:
+#    active: usa
   datasource:
     url: jdbc:postgresql://localhost/marcin
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+  main:
+      allow-bean-definition-overriding: true
   jpa:
     properties:
       format_sql: true
@@ -21,7 +23,30 @@ spring:
       org.springframework.web: INFO
       guru.springframework.controllers: INFO
       org.hibernate: INFO
+      org.springframework.security: DEBUG
 server:
   servlet:
     context-path: /bank
+
 age-of-majority: 18
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+#springdoc:
+#  swagger-ui:
+#    path: /swagger-something.html
