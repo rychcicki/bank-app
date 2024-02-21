@@ -12,7 +12,9 @@ spring:
     properties:
       format_sql: true
     defer-datasource-initialization: true
-    database-platform: PostgreSQL
+#    database-platform: PostgreSQL
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create-drop
     show-sql: true
@@ -24,6 +26,11 @@ spring:
       guru.springframework.controllers: INFO
       org.hibernate: INFO
       org.springframework.security: DEBUG
+
+
+#  output:
+#    ansi:
+#      enabled: DETECT
 server:
   servlet:
     context-path: /bank
@@ -44,9 +51,6 @@ securityDefinitions:
     name: Authorization
     in: header
 
-logging:
-  level:
-    org.springframework.security: DEBUG
 #springdoc:
 #  swagger-ui:
 #    path: /swagger-something.html

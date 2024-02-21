@@ -1,6 +1,6 @@
-package com.example.bank.auth;
+package com.example.bank.security.auth;
 
-import com.example.bank.registration.ClientRequest;
+import com.example.bank.client.ClientRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,24 +16,27 @@ import java.io.IOException;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    private final AuthenticationService authenticationService;
+    private final AuthenticationService service;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody /*RegisterRequest*/ ClientRequest clientRequest) {
-        return ResponseEntity.ok(authenticationService.register(clientRequest));
-    }
-
-    @PostMapping("/refresh-token")
-    public void refreshToken(HttpServletRequest request,
-                             HttpServletResponse response) throws IOException {
-        authenticationService.refreshToken(request,response);
+            @RequestBody ClientRequest clientRequest
+    ) {
+        return ResponseEntity.ok(service.registerClient(clientRequest));
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest authenticationRequest
+            @RequestBody AuthenticationRequest request
     ) {
-       return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
+        return ResponseEntity.ok(service.authenticate(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        service.refreshToken(request, response);
     }
 }

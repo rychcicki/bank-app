@@ -1,8 +1,9 @@
-package com.example.bank.registration.jpa;
+package com.example.bank.client.jpa;
 
-import com.example.bank.account.Account;
+import com.example.bank.auditing.AuditorEntity;
+import com.example.bank.bankTransfer.account.Account;
+import com.example.bank.client.Role;
 import com.example.bank.security.token.Token;
-import com.example.bank.user.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,13 +23,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Client implements UserDetails {
+public class Client extends AuditorEntity implements UserDetails {
     @Id
     @SequenceGenerator(name = "client_sequence", sequenceName = "client_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_sequence")
     @Column(nullable = false)
     @EqualsAndHashCode.Exclude
-    private Long id;
+    private Integer id;
     @NotEmpty
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -44,15 +45,14 @@ public class Client implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
-            fetch = FetchType.EAGER)
+    @OneToMany(/*mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.ALL}*/)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "client_id")
     private List<Token> token;
     @Embedded
     private Address address;
-    @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
-            fetch = FetchType.EAGER)
+    @OneToMany(/*mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}*/)
     private List<Account> account;
-
 
     public Client(String firstName, String lastName, LocalDate birthDate, String email, String password,
                   Address address) {
@@ -72,7 +72,6 @@ public class Client implements UserDetails {
 
     @Override
     public String getUsername() {
-        /** Dlaczego tu jest email....? */
         return email;
     }
 

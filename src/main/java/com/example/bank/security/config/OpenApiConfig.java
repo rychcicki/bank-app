@@ -3,42 +3,47 @@ package com.example.bank.security.config;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.servers.Server;
 
-
-@OpenAPIDefinition(info = @Info(title = "Your API Title", version = "v1"),
-        security = @SecurityRequirement(name = "bearerAuth"))
-@SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer",
-        bearerFormat = "JWT", in = SecuritySchemeIn.HEADER)
-public class OpenApiConfig {
-/*    private final String moduleName;
-    private final String apiVersion;
-
-    public OpenApiConfig(
-            @Value("${module-name}") String moduleName,
-            @Value("${api-version}") String apiVersion) {
-        this.moduleName = moduleName;
-        this.apiVersion = apiVersion;
-    }*/
-
-  /*  @Bean
-    public OpenAPI customOpenAPI() {
-        final String securitySchemeName = "bearerAuth";
-        final String apiTitle = String.format("%s API", StringUtils.capitalize(moduleName));
-        return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
-                .components(
-                        new Components()
-                                .addSecuritySchemes(securitySchemeName,
-                                        new SecurityScheme()
-                                                .name(securitySchemeName)
-                                                .type(SecurityScheme.Type.HTTP)
-                                                .scheme("bearer")
-                                                .bearerFormat("JWT")
-                                )
+@OpenAPIDefinition(
+        info = @Info(
+                contact = @Contact(
+                        name = "Marcin",
+                        email = "phppoznan@gmail.com",
+                        url = "https://github.com/rychcicki"
+                ),
+                description = "OpenApi documentation for Bank App",
+                version = "1.0",
+                license = @License(
+                        name = "GNU General Public License",
+                        url = "https://www.gnu.org/licenses/gpl-3.0.html#license-text"
+                ),
+                termsOfService = "Terms of service"
+        ),
+        servers = {
+                @Server(
+                        description = "Local ENV",
+                        url = "http://localhost:8080/bank"
+                ),
+        },
+        security = {
+                @SecurityRequirement(
+                        name = "bearerAuth"
                 )
-                .info(new Info().title(apiTitle).version(apiVersion));
-    }*/
+        }
+)
+@SecurityScheme(
+        name = "bearerAuth",
+        description = "JWT auth description",
+        scheme = "bearer",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        in = SecuritySchemeIn.HEADER
+)
+public class OpenApiConfig {
 }

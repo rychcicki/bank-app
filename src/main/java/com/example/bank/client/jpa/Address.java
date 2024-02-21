@@ -1,4 +1,4 @@
-package com.example.bank.registration.jpa;
+package com.example.bank.client.jpa;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
