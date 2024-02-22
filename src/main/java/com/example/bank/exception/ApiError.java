@@ -8,8 +8,9 @@ import java.time.LocalDateTime;
 
 @Getter
 public class ApiError {
+    private final String localDateTimePattern = "dd-MMM-YYYY HH:mm:ss";
     private final HttpStatus status;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-YYYY HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = localDateTimePattern)
     private final LocalDateTime timestamp;
     private final String message;
 

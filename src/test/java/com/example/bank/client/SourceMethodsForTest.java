@@ -1,12 +1,12 @@
-package com.example.bank.registration;
+package com.example.bank.client;
 
-import com.example.bank.registration.jpa.Client;
+import com.example.bank.client.jpa.Client;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.stream.Stream;
 
-import static com.example.bank.registration.ClientRequestServiceUtils.*;
-import static com.example.bank.registration.ClientServiceUtils.*;
+import static com.example.bank.client.ClientRequestServiceUtils.*;
+import static com.example.bank.client.ClientServiceUtils.*;
 
 class SourceMethodsForTest {
     static Stream<Arguments> clientBelow18YearsOldSource() {

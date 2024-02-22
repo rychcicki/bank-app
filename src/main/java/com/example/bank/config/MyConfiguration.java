@@ -1,17 +1,17 @@
 package com.example.bank.config;
 
-import com.example.bank.registration.ClientService;
-import com.example.bank.registration.jpa.ClientRepository;
+import com.example.bank.client.ClientService;
+import com.example.bank.client.jpa.ClientRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
-
 public class MyConfiguration {
     @Bean
     @RequestScope
-    ClientService clientService(ClientRepository clientRepository) {
-        return new ClientService(clientRepository);
+    ClientService clientService(ClientRepository clientRepository, PasswordEncoder passwordEncoder) {
+        return new ClientService(clientRepository, passwordEncoder);
     }
 }

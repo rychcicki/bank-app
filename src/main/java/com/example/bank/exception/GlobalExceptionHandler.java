@@ -1,5 +1,7 @@
 package com.example.bank.exception;
 
+import org.iban4j.InvalidCheckDigitException;
+import org.iban4j.UnsupportedCountryException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,16 +13,19 @@ import java.util.function.Function;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    private final Map<Class<? extends Exception>, Function<Exception, ResponseEntity<ApiError>>>
-            exceptionHandlers;
+    private final Map<Class<? extends Exception>, Function<Exception, ResponseEntity<ApiError>>> exceptionHandlers;
 
     public GlobalExceptionHandler() {
         this.exceptionHandlers = new HashMap<>();
         this.exceptionHandlers.put(ClientNotFoundException.class, this::handleClientNotFoundException);
         this.exceptionHandlers.put(IllegalArgumentException.class, this::handleIllegalArgumentException);
+        this.exceptionHandlers.put(InvalidCheckDigitException.class, this::handleInternalException);
+        this.exceptionHandlers.put(UnsupportedCountryException.class, this::handleInternalException);
+
     }
 
-    @ExceptionHandler({ClientNotFoundException.class, IllegalArgumentException.class, RuntimeException.class})
+    @ExceptionHandler({ClientNotFoundException.class, IllegalArgumentException.class, RuntimeException.class,
+            InvalidCheckDigitException.class, UnsupportedCountryException.class})
     public ResponseEntity<ApiError> handleException(Exception ex) {
         Function<Exception, ResponseEntity<ApiError>> handler = exceptionHandlers.getOrDefault(ex.getClass(),
                 this::handleInternalException);
