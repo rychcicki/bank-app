@@ -10,7 +10,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-/** @Builder wymaga AllArgsa*/
 @Entity
 public class Token {
     @Id
@@ -24,8 +23,6 @@ public class Token {
     public boolean expired;
     @ManyToOne
     @JoinColumn(name = "client_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "client_id_fk"))
-    /** W ten sposób mogę jedynie nie wpaść w StackOverflowError. */
     @JsonIgnoreProperties("token")
     public Client client;
-
 }

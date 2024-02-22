@@ -31,9 +31,6 @@ class ClientController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    /**
-     * Czy to w ogóle może być w tym kontrolerze (w tej lokalizacji endpointu) ??
-     */
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Principal connectedUser) {
         clientService.changePassword(request, connectedUser);

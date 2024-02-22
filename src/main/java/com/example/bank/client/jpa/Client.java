@@ -45,13 +45,12 @@ public class Client extends AuditorEntity implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(/*mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.ALL}*/)
-//    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToMany
     @JoinColumn(name = "client_id")
     private List<Token> token;
     @Embedded
     private Address address;
-    @OneToMany(/*mappedBy = "client", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}*/)
+    @OneToMany
     private List<Account> account;
 
     public Client(String firstName, String lastName, LocalDate birthDate, String email, String password,
@@ -61,7 +60,7 @@ public class Client extends AuditorEntity implements UserDetails {
         this.birthDate = birthDate;
         this.email = email;
         this.password = password;
-        this.role = Role.ADMIN;
+        this.role = Role.USER;
         this.address = address;
     }
 
