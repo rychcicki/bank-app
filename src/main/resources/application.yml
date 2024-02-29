@@ -12,7 +12,6 @@ spring:
     properties:
       format_sql: true
     defer-datasource-initialization: true
-#    database-platform: PostgreSQL
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -27,15 +26,12 @@ spring:
       org.hibernate: INFO
       org.springframework.security: DEBUG
 
-
-#  output:
-#    ansi:
-#      enabled: DETECT
 server:
   servlet:
     context-path: /bank
 
 age-of-majority: 18
+my-bank-account: "575"
 
 application:
   security:

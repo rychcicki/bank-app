@@ -32,7 +32,6 @@ public abstract class AuditorEntity {
     @LastModifiedBy
     private Integer updatedBy;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = localDateTimePattern)
-    /** Jakim cudem będziemy mieć dostęp do tych pól po usunięciu obiektu z bazy?? */
     private LocalDateTime deletedOn;
     private Integer deletedBy;
     private Boolean isDeleted = false;
