@@ -25,7 +25,12 @@ spring:
       guru.springframework.controllers: INFO
       org.hibernate: INFO
       org.springframework.security: DEBUG
-
+  cloud:
+    openfeign:
+      client:
+        config:
+          rateClient:
+            url: "http://api.nbp.pl/api/exchangerates/rates/a/"
 server:
   servlet:
     context-path: /bank

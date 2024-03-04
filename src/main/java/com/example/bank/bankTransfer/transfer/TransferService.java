@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,7 +18,7 @@ import java.math.RoundingMode;
 @Slf4j
 public class TransferService {
     private final AccountRepository accountRepository;
-    private final String apiNbpUrl = "http://api.nbp.pl/api/exchangerates/rates/";
+    private final RateClient rateClient;
 
     public void bankTransfer(TransferRequest transferRequest) {
         TransferValidationUtils transferValidationUtils = new TransferValidationUtils();
@@ -96,14 +93,12 @@ public class TransferService {
         if (currency.equals(Currency.PLN)) {
             return BigDecimal.ONE;
         }
-        RestTemplate restTemplate = new RestTemplate();
-        String currencyApiString = restTemplate.getForObject(apiNbpUrl + "a/{code}/?format=json",
-                String.class, currency);
-        JSONObject jsonObject = new JSONObject(currencyApiString);
-        JSONArray ratesArr = jsonObject.getJSONArray("rates");
-        JSONObject rates = ratesArr.getJSONObject(0);
-        BigDecimal currencyRate = rates.getBigDecimal("mid");
-        log.info("{} rate: {}", currency, currencyRate);
-        return currencyRate;
+        BigDecimal mid = rateClient
+                .getCurrencyRate(currency)
+                .getRates()
+                .get(0)
+                .getMid();
+        log.info("{} rate: {}", currency, mid);
+        return mid;
     }
 }
