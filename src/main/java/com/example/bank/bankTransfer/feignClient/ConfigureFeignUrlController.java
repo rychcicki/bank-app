@@ -1,4 +1,4 @@
-package com.example.bank.bankTransfer.transfer;
+package com.example.bank.bankTransfer.feignClient;
 
 import com.example.bank.bankTransfer.account.Currency;
 import lombok.RequiredArgsConstructor;

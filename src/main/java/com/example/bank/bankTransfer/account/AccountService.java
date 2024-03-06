@@ -7,8 +7,6 @@ import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-
 @Service
 @RequiredArgsConstructor
 @Getter
@@ -20,7 +18,6 @@ public class AccountService {
         Account myBankAccount = new Account();
         myBankAccount.setAccountNumber(AccountNumberGenerator.myBankIbanGenerator().toString());
         myBankAccount.setCurrency(Currency.PLN);
-        myBankAccount.setBalance(BigDecimal.ZERO);
         myBankAccount.setType(AccountType.CURRENT_ACCOUNT);
         AccountNumberGenerator.accountNumberValidator(myBankAccount.getAccountNumber());
         accountRepository.save(myBankAccount);
@@ -31,7 +28,6 @@ public class AccountService {
         Account polishAccount = new Account();
         polishAccount.setAccountNumber(AccountNumberGenerator.polishIbanGenerator().toString());
         polishAccount.setCurrency(Currency.PLN);
-        polishAccount.setBalance(BigDecimal.ZERO);
         polishAccount.setType(AccountType.CURRENT_ACCOUNT);
         AccountNumberGenerator.accountNumberValidator(polishAccount.getAccountNumber());
         accountRepository.save(polishAccount);
@@ -52,7 +48,6 @@ public class AccountService {
             case NO, BV, SJ -> foreignAccountWithOfficialCurrency.setCurrency(Currency.NOK);
             default -> foreignAccountWithOfficialCurrency.setCurrency(Currency.USD);
         }
-        foreignAccountWithOfficialCurrency.setBalance(BigDecimal.valueOf(0L));
         foreignAccountWithOfficialCurrency.setType(AccountType.CURRENT_ACCOUNT);
         AccountNumberGenerator.accountNumberValidator(foreignAccountWithOfficialCurrency.getAccountNumber());
         accountRepository.save(foreignAccountWithOfficialCurrency);

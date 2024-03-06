@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
     private final AccountService accountService;
 
-    @PostMapping("/create-myBank-account")
+    @PostMapping("/create-account")
     ResponseEntity<Account> createMyBankAccount() {
         return ResponseEntity.ok(accountService.createMyBankAccount());
     }

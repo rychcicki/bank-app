@@ -29,7 +29,7 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountType type;
     @Column(nullable = false)
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "client_id_fk"))
     private Client client;

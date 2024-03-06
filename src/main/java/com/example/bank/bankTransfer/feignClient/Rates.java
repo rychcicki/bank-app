@@ -1,4 +1,4 @@
-package com.example.bank.bankTransfer.transfer;
+package com.example.bank.bankTransfer.feignClient;
 
 import lombok.Getter;
 

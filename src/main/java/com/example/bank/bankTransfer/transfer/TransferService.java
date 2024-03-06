@@ -3,6 +3,7 @@ package com.example.bank.bankTransfer.transfer;
 import com.example.bank.bankTransfer.account.Account;
 import com.example.bank.bankTransfer.account.AccountRepository;
 import com.example.bank.bankTransfer.account.Currency;
+import com.example.bank.bankTransfer.feignClient.RateClient;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,21 +36,18 @@ public class TransferService {
 
         transferValidationUtils.amountValidation(amount);
         BigDecimal balance;
-
-        if (fromAccountCountryCode.equals(toAccountCountryCode)) {
-            if (fromAccountCurrency.equals(toAccountCurrency)) {
-                balance = fromAccount.getBalance();
-                transferValidationUtils.balanceValidation(balance, fromAccountCurrency, amount);
-                transfer(fromAccount, toAccount, amount);
-            } else {
-                log.info("Different currencies.");
-                transferInDifferentCurrencies(fromAccountCurrency, toAccountCurrency, amount,
-                        fromAccount, toAccount, transferValidationUtils);
-            }
+        boolean isDomesticSameCurrencyTransfer = fromAccountCountryCode.equals(toAccountCountryCode)
+                && fromAccountCurrency.equals(toAccountCurrency);
+        if (isDomesticSameCurrencyTransfer) {
+            balance = fromAccount.getBalance();
+            transferValidationUtils.balanceValidation(balance, fromAccountCurrency, amount);
+            transfer(fromAccount, toAccount, amount);
         } else {
-            log.info("Foreign transfer.");
-            transferInDifferentCurrencies(fromAccountCurrency, toAccountCurrency, amount,
-                    fromAccount, toAccount, transferValidationUtils);
+            String transferType = fromAccountCountryCode.equals(toAccountCountryCode) ? "Different currencies."
+                    : "Foreign transfer.";
+            log.info(transferType);
+            transferInDifferentCurrencies(fromAccountCurrency, toAccountCurrency, amount, fromAccount, toAccount,
+                    transferValidationUtils);
         }
     }
 
@@ -72,20 +71,18 @@ public class TransferService {
     public void transfer(Account fromAccount, Account toAccount, BigDecimal amount) {
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
-        accountRepository.save(fromAccount);
-        accountRepository.save(toAccount);
-        log.info("Bank transfer for {} {} has done. Fist account's balance: {} {}, second account's balance: {} {}.",
-                amount, fromAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
+        accountRepository.saveAll(List.of(fromAccount, toAccount));
+        log.info("Bank transfer for {} {} has done. First account's balance: {} {}, second account's balance: {} {}.",
+                amount, toAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
                 toAccount.getBalance(), toAccount.getCurrency());
     }
 
     public void transfer(Account fromAccount, Account toAccount, BigDecimal amount, BigDecimal amountOfTransferCurrency) {
         fromAccount.setBalance(fromAccount.getBalance().subtract(amountOfTransferCurrency));
         toAccount.setBalance(toAccount.getBalance().add(amount));
-        accountRepository.save(fromAccount);
-        accountRepository.save(toAccount);
-        log.info("Bank transfer for {} {} has done. Fist account's balance: {} {}, second account's balance: {} {}.",
-                amount, fromAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
+        accountRepository.saveAll(List.of(fromAccount, toAccount));
+        log.info("Bank transfer for {} {} has done. First account's balance: {} {}, second account's balance: {} {}.",
+                amount, toAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
                 toAccount.getBalance(), toAccount.getCurrency());
     }
 
