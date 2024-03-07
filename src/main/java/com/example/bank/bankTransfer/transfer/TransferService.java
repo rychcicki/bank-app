@@ -3,7 +3,7 @@ package com.example.bank.bankTransfer.transfer;
 import com.example.bank.bankTransfer.account.Account;
 import com.example.bank.bankTransfer.account.AccountRepository;
 import com.example.bank.bankTransfer.account.Currency;
-import com.example.bank.bankTransfer.feignClient.RateClient;
+import com.example.bank.bankTransfer.feign.RateClient;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

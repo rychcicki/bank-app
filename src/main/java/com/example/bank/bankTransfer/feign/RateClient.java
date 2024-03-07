@@ -1,4 +1,4 @@
-package com.example.bank.bankTransfer.feignClient;
+package com.example.bank.bankTransfer.feign;
 
 import com.example.bank.bankTransfer.account.Currency;
 import org.springframework.cloud.openfeign.FeignClient;
