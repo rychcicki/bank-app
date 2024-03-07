@@ -3,7 +3,6 @@ package com.example.bank.client;
 import com.example.bank.client.jpa.Client;
 import com.example.bank.client.jpa.ClientRepository;
 import com.example.bank.exception.ClientNotFoundException;
-import com.example.bank.security.auth.AuthenticationResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,31 +23,10 @@ class ClientServiceTest {
     private ClientRepository clientRepository;
     @InjectMocks
     private ClientService clientService;
-//    private AuthenticationService authenticationService;
-//    private JwtService jwtService;
 
     @BeforeEach
     public void beforeEach() {
         clientService.setMajority(18);
-    }
-
-    @DisplayName("A parameterized test of registerClient() method")
-    @ParameterizedTest
-    @MethodSource("com.example.bank.client.SourceMethodsForTest#clientOver18YearsOldSource")
-    void shouldReturnClientWhenClientIs18YearsOldOrMore(Client client, ClientRequest clientRequest) {
-        AuthenticationResponse authenticationResponseForTest = new AuthenticationResponse();
-//        when(clientRepository.save(client)).thenReturn(client);
-//        AuthenticationResponse authenticationResponse = authenticationService.registerClient(clientRequest);
-//        Assertions.assertEquals(authenticationResponse, authenticationResponseForTest);
-    }
-
-    @DisplayName("A parameterized test of registerClient() method")
-    @ParameterizedTest
-    @MethodSource("com.example.bank.client.SourceMethodsForTest#clientRequestBelow18YearsOldSource")
-    void shouldReturnIllegalArgumentExceptionWhenAgeIsBelow18YearsOld(ClientRequest clientRequest) {
-//        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-//            authenticationService.registerClient(clientRequest);
-//        }, "Client has to be adult.");
     }
 
     @DisplayName("A parameterized test of getClient() method")

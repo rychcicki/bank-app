@@ -12,7 +12,6 @@ spring:
     properties:
       format_sql: true
     defer-datasource-initialization: true
-#    database-platform: PostgreSQL
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -26,16 +25,18 @@ spring:
       guru.springframework.controllers: INFO
       org.hibernate: INFO
       org.springframework.security: DEBUG
-
-
-#  output:
-#    ansi:
-#      enabled: DETECT
+  cloud:
+    openfeign:
+      client:
+        config:
+          rateClient:
+            url: "http://api.nbp.pl/api/exchangerates/rates/a/"
 server:
   servlet:
     context-path: /bank
 
 age-of-majority: 18
+my-bank-account: "575"
 
 application:
   security:

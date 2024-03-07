@@ -3,8 +3,6 @@ package com.example.bank.auditing;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
@@ -31,23 +29,4 @@ public abstract class AuditorEntity {
     private LocalDateTime updateOn;
     @LastModifiedBy
     private Integer updatedBy;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = localDateTimePattern)
-    /** Jakim cudem będziemy mieć dostęp do tych pól po usunięciu obiektu z bazy?? */
-    private LocalDateTime deletedOn;
-    private Integer deletedBy;
-    private Boolean isDeleted = false;
-
-    @PreUpdate
-    @PrePersist
-    public void beforeAnyUpdate() {
-        if (isDeleted != null && isDeleted) {
-            if (deletedBy == null) {
-                ApplicationAuditAware applicationAuditAware = new ApplicationAuditAware();
-                deletedBy = applicationAuditAware.getCurrentAuditor().orElseThrow();
-            }
-            if (getDeletedOn() == null) {
-                deletedOn = LocalDateTime.now();
-            }
-        }
-    }
 }

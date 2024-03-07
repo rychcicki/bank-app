@@ -1,4 +1,4 @@
-package com.example.bank.account;
+package com.example.bank.bankTransfer.account;
 
 public enum AccountType {
     CURRENT_ACCOUNT,

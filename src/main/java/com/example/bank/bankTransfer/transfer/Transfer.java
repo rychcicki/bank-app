@@ -1,12 +1,11 @@
-package com.example.bank.account;
+package com.example.bank.bankTransfer.transfer;
 
-import com.example.bank.registration.jpa.Address;
+import com.example.bank.client.jpa.Address;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-import org.iban4j.Iban;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
@@ -32,19 +31,14 @@ public class Transfer {
     private Long beneficiaryAccountNumberId;
     @Column(name = "title_of_transfer", nullable = false)
     @NotBlank(message = "title of transfer is mandatory")
-    private String titleOfTransfer;
+    private String title;
     @Column(nullable = false)
-    @Min((long) 0.01)
+    @Min(1L)
     private BigDecimal amount;
-    @Column(name = "transfer_delivery_time", nullable = false)
+    @Column(name = "delivery_time", nullable = false)
     @DateTimeFormat
-    private LocalDate transferDeliveryTime;
+    private LocalDate deliveryTime;
     @Column(name = "transfer_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private TransferType transferType;
-//    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-//    @JoinColumn(name = "account_id",
-//            referencedColumnName = "id",
-//            foreignKey = @ForeignKey(name = "account_id_fk"))
-//    private Account account;
 }
