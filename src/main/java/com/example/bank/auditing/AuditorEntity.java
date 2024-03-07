@@ -30,3 +30,5 @@ public abstract class AuditorEntity {
     @LastModifiedBy
     private Integer updatedBy;
 }
+
+
