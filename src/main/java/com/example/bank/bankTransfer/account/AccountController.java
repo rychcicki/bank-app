@@ -2,6 +2,7 @@ package com.example.bank.bankTransfer.account;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,18 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
     private final AccountService accountService;
 
-    @PostMapping("/create-account")
-    ResponseEntity<Account> createMyBankAccount() {
-        return ResponseEntity.ok(accountService.createMyBankAccount());
+    @PostMapping("/create-account/{clientId}")
+    ResponseEntity<Account> createMyBankAccount(@PathVariable Integer clientId) {
+        return ResponseEntity.ok(accountService.createMyBankAccount(clientId));
     }
 
-    @PostMapping("/create-polish-account")
-    ResponseEntity<Account> createPolishAccounts() {
-        return ResponseEntity.ok(accountService.createPolishAccounts());
+    @PostMapping("/create-polish-account/{clientId}")
+    ResponseEntity<Account> createPolishAccounts(@PathVariable Integer clientId) {
+        return ResponseEntity.ok(accountService.createPolishAccounts(clientId));
     }
 
-    @PostMapping("/create-foreign-account")
-    ResponseEntity<Account> createForeignAccount() {
-        return ResponseEntity.ok(accountService.createForeignAccount());
+    @PostMapping("/create-foreign-account/{clientId}")
+    ResponseEntity<Account> createForeignAccount(@PathVariable Integer clientId) {
+        return ResponseEntity.ok(accountService.createForeignAccount(clientId));
     }
 }

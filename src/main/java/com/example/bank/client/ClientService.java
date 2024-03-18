@@ -31,7 +31,7 @@ public class ClientService {
     @Setter(AccessLevel.PACKAGE) // only for testing
     private Integer majority;
 
-    Client getClientById(Integer id) {
+    public Client getClientById(Integer id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error(noClientInDatabaseLogMessage, id);

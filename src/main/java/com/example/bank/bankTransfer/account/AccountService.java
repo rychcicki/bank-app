@@ -1,5 +1,7 @@
 package com.example.bank.bankTransfer.account;
 
+import com.example.bank.client.ClientService;
+import com.example.bank.client.jpa.Client;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,28 +15,34 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final ClientService clientService;
 
-    public Account createMyBankAccount() {
+    public Account createMyBankAccount(Integer clientId) {
+        Client client = clientService.getClientById(clientId);
         Account myBankAccount = new Account();
         myBankAccount.setAccountNumber(AccountNumberGenerator.myBankIbanGenerator().toString());
         myBankAccount.setCurrency(Currency.PLN);
         myBankAccount.setType(AccountType.CURRENT_ACCOUNT);
+        myBankAccount.setClient(client);
         AccountNumberGenerator.accountNumberValidator(myBankAccount.getAccountNumber());
         accountRepository.save(myBankAccount);
         return myBankAccount;
     }
 
-    public Account createPolishAccounts() {
+    public Account createPolishAccounts(Integer clientId) {
+        Client client = clientService.getClientById(clientId);
         Account polishAccount = new Account();
         polishAccount.setAccountNumber(AccountNumberGenerator.polishIbanGenerator().toString());
         polishAccount.setCurrency(Currency.PLN);
         polishAccount.setType(AccountType.CURRENT_ACCOUNT);
+        polishAccount.setClient(client);
         AccountNumberGenerator.accountNumberValidator(polishAccount.getAccountNumber());
         accountRepository.save(polishAccount);
         return polishAccount;
     }
 
-    public Account createForeignAccount() {
+    public Account createForeignAccount(Integer clientId) {
+        Client client = clientService.getClientById(clientId);
         Account foreignAccountWithOfficialCurrency = new Account();
         Iban iban = AccountNumberGenerator.foreignIbanGenerator();
         foreignAccountWithOfficialCurrency.setAccountNumber(iban.toString());
@@ -50,6 +58,7 @@ public class AccountService {
         }
         foreignAccountWithOfficialCurrency.setType(AccountType.CURRENT_ACCOUNT);
         AccountNumberGenerator.accountNumberValidator(foreignAccountWithOfficialCurrency.getAccountNumber());
+        foreignAccountWithOfficialCurrency.setClient(client);
         accountRepository.save(foreignAccountWithOfficialCurrency);
         return foreignAccountWithOfficialCurrency;
     }

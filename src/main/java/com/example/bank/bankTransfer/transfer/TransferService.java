@@ -4,6 +4,9 @@ import com.example.bank.bankTransfer.account.Account;
 import com.example.bank.bankTransfer.account.AccountRepository;
 import com.example.bank.bankTransfer.account.Currency;
 import com.example.bank.bankTransfer.feign.RateClient;
+import com.example.bank.bankTransfer.transfer.history.TransferHistory;
+import com.example.bank.bankTransfer.transfer.history.TransferHistoryRepository;
+import com.example.bank.bankTransfer.transfer.history.TransferHistoryService;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import java.util.List;
 @Getter
 @Slf4j
 public class TransferService {
+    private final TransferHistoryService transferHistoryService;
+    private final TransferHistoryRepository transferHistoryRepository;
     private final AccountRepository accountRepository;
     private final RateClient rateClient;
 
@@ -69,18 +74,38 @@ public class TransferService {
     }
 
     public void transfer(Account fromAccount, Account toAccount, BigDecimal amount) {
+        TransferHistory fromAccountTransferHistory =
+                transferHistoryService.buildFromAccountTransferHistory(fromAccount, amount, toAccount);
+        TransferHistory toAccountTransferHistory =
+                transferHistoryService.buildToAccountTransferHistory(toAccount, amount, fromAccount);
+
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
         accountRepository.saveAll(List.of(fromAccount, toAccount));
+
+        fromAccountTransferHistory.setAfterBalance(fromAccount.getBalance());
+        toAccountTransferHistory.setAfterBalance(toAccount.getBalance());
+        transferHistoryRepository.saveAll(List.of(fromAccountTransferHistory, toAccountTransferHistory));
+
         log.info("Bank transfer for {} {} has done. First account's balance: {} {}, second account's balance: {} {}.",
                 amount, toAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
                 toAccount.getBalance(), toAccount.getCurrency());
     }
 
     public void transfer(Account fromAccount, Account toAccount, BigDecimal amount, BigDecimal amountOfTransferCurrency) {
+        TransferHistory fromAccountTransferHistory =
+                transferHistoryService.buildFromAccountTransferHistory(fromAccount, amountOfTransferCurrency, toAccount);
+        TransferHistory toAccountTransferHistory =
+                transferHistoryService.buildToAccountTransferHistory(toAccount, amount, fromAccount);
+
         fromAccount.setBalance(fromAccount.getBalance().subtract(amountOfTransferCurrency));
         toAccount.setBalance(toAccount.getBalance().add(amount));
         accountRepository.saveAll(List.of(fromAccount, toAccount));
+
+        fromAccountTransferHistory.setAfterBalance(fromAccount.getBalance());
+        toAccountTransferHistory.setAfterBalance(toAccount.getBalance());
+        transferHistoryRepository.saveAll(List.of(fromAccountTransferHistory, toAccountTransferHistory));
+
         log.info("Bank transfer for {} {} has done. First account's balance: {} {}, second account's balance: {} {}.",
                 amount, toAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
                 toAccount.getBalance(), toAccount.getCurrency());
