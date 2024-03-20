@@ -23,10 +23,10 @@ public abstract class AuditorEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = localDateTimePattern)
     private LocalDateTime createdOn;
     @CreatedBy
-    private Integer createdBy;
+    private Long createdBy;
     @LastModifiedDate
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = localDateTimePattern)
     private LocalDateTime updateOn;
     @LastModifiedBy
-    private Integer updatedBy;
+    private Long updatedBy;
 }

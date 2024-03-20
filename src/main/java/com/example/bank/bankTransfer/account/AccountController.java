@@ -14,17 +14,17 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping("/create-account/{clientId}")
-    ResponseEntity<Account> createMyBankAccount(@PathVariable Integer clientId) {
+    ResponseEntity<Account> createMyBankAccount(@PathVariable Long clientId) {
         return ResponseEntity.ok(accountService.createMyBankAccount(clientId));
     }
 
     @PostMapping("/create-polish-account/{clientId}")
-    ResponseEntity<Account> createPolishAccounts(@PathVariable Integer clientId) {
+    ResponseEntity<Account> createPolishAccounts(@PathVariable Long clientId) {
         return ResponseEntity.ok(accountService.createPolishAccounts(clientId));
     }
 
     @PostMapping("/create-foreign-account/{clientId}")
-    ResponseEntity<Account> createForeignAccount(@PathVariable Integer clientId) {
+    ResponseEntity<Account> createForeignAccount(@PathVariable Long clientId) {
         return ResponseEntity.ok(accountService.createForeignAccount(clientId));
     }
 }

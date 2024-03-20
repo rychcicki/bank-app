@@ -3,6 +3,7 @@ package com.example.bank.bankTransfer.transfer.history;
 import com.example.bank.auditing.AuditorEntity;
 import com.example.bank.bankTransfer.transfer.TransferType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -23,13 +24,16 @@ public class TransferHistory extends AuditorEntity {
     @Column(nullable = false)
     private TransferType transferType;
     @Column(name = "client_id", nullable = false)
-    private Integer clientId;
+    private Long clientId;
     @Column(name = "bank_account_id", nullable = false)
     private Long bankAccountId;
     @Column(name = "before_balance", nullable = false)
-    private BigDecimal beforeBalance;
+    private BigDecimal previousBalance;
     @Column(nullable = false)
     private BigDecimal amount;
-    @Column(name = "after_balance", nullable = false)
-    private BigDecimal afterBalance;
+    @Column(nullable = false)
+    private BigDecimal balance;
+    @Column(name = "title_of_transfer", nullable = false)
+    @NotBlank(message = "title of transfer is mandatory")
+    private String title;
 }

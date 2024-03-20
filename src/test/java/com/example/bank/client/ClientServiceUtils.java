@@ -21,14 +21,14 @@ class ClientServiceUtils {
     }
 
     static Client clientWithId3Builder() {
-        return new Client(3, "Zdzislaw", "Krecina", LocalDate.of(1954, 4, 28),
+        return new Client(3L, "Zdzislaw", "Krecina", LocalDate.of(1954, 4, 28),
                 "zdzislaw.krecina@gmail.com", "password", Role.ADMIN, tempListOfTokens,
                 new Address("Tatrzanska", "7B", "12-456", "Zywiec"),
                 tempListOfAccounts);
     }
 
     static Client clientAdultWithId5Builder() {
-        return new Client(5, "Adam", "Mialczynski", LocalDate.of(1956, 11, 11),
+        return new Client(5L, "Adam", "Mialczynski", LocalDate.of(1956, 11, 11),
                 "adam.mialczynski@gmail.com", "password", Role.ADMIN, tempListOfTokens,
                 new Address("Mickiewicza", "13A/3", "00-914", "Warszawa"),
                 tempListOfAccounts);
@@ -49,7 +49,7 @@ class ClientServiceUtils {
     }
 
     static Client resultUpdateClientWithId5Builder() {
-        return new Client(5, "Czeslawa", "Cieslak", LocalDate.of(1938, 6, 10),
+        return new Client(5L, "Czeslawa", "Cieslak", LocalDate.of(1938, 6, 10),
                 "czeslawa.cieslak@gmail.com", "password", Role.ADMIN, tempListOfTokens,
                 new Address("Obroncow Warszawy", "31", "57-343",
                         "Lewin Klodzki"), tempListOfAccounts);
@@ -62,7 +62,7 @@ class ClientServiceUtils {
     }
 
     static Client resultOfRegisterClientAdultWithIdBuilder() {
-        return new Client(5, "Adam", "Mialczynski", LocalDate.of(1956, 11, 11),
+        return new Client(5L, "Adam", "Mialczynski", LocalDate.of(1956, 11, 11),
                 "adam.mialczynski@gmail.com", "password", Role.ADMIN, tempListOfTokens,
                 new Address("Mickiewicza", "13A/3", "00-914", "Warszawa"),
                 tempListOfAccounts);

@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface TransferHistoryRepository extends JpaRepository<TransferHistory, Long> {
-    List<TransferHistory> findByClientId(Integer clientId);
+    List<TransferHistory> findByClientId(Long clientId);
 }

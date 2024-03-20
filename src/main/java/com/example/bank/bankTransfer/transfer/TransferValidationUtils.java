@@ -14,12 +14,12 @@ public class TransferValidationUtils {
         }
     }
 
-    public void balanceValidation(@NonNull BigDecimal balance, @NonNull Currency fromAccountCurrency,
+    public void balanceValidation(@NonNull BigDecimal balance, @NonNull Currency senderAccountCurrency,
                                   @NonNull BigDecimal amount) {
         if (balance.compareTo(amount) < 0) {
             throw new IllegalArgumentException(String.format("You have not enough money to do a transfer. " +
-                            "Your balance is %s %s. You need at least %s %s.", balance, fromAccountCurrency, amount,
-                    fromAccountCurrency));
+                            "Your balance is %s %s. You need at least %s %s.", balance, senderAccountCurrency, amount,
+                    senderAccountCurrency));
         }
     }
 }

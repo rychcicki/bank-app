@@ -17,7 +17,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final ClientService clientService;
 
-    public Account createMyBankAccount(Integer clientId) {
+    public Account createMyBankAccount(Long clientId) {
         Client client = clientService.getClientById(clientId);
         Account myBankAccount = new Account();
         myBankAccount.setAccountNumber(AccountNumberGenerator.myBankIbanGenerator().toString());
@@ -29,7 +29,7 @@ public class AccountService {
         return myBankAccount;
     }
 
-    public Account createPolishAccounts(Integer clientId) {
+    public Account createPolishAccounts(Long clientId) {
         Client client = clientService.getClientById(clientId);
         Account polishAccount = new Account();
         polishAccount.setAccountNumber(AccountNumberGenerator.polishIbanGenerator().toString());
@@ -41,7 +41,7 @@ public class AccountService {
         return polishAccount;
     }
 
-    public Account createForeignAccount(Integer clientId) {
+    public Account createForeignAccount(Long clientId) {
         Client client = clientService.getClientById(clientId);
         Account foreignAccountWithOfficialCurrency = new Account();
         Iban iban = AccountNumberGenerator.foreignIbanGenerator();

@@ -19,9 +19,9 @@ class TransferController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/generate-bank-statement/{clientId}")
-    ResponseEntity<Void> generateXlsxBankStatement(@PathVariable Integer clientId) {
-        transferHistoryService.generateXlsxBankStatement(clientId);
+    @PostMapping("/generate-transfer-history/{clientId}")
+    ResponseEntity<Void> generateXlsxTransferHistory(@PathVariable Long clientId) {
+        transferHistoryService.generateXlsxTransferHistory(clientId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

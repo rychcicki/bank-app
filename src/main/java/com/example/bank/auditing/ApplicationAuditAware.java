@@ -1,6 +1,7 @@
 package com.example.bank.auditing;
 
 import com.example.bank.client.jpa.Client;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,9 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
-public class ApplicationAuditAware implements AuditorAware<Integer> {
+public class ApplicationAuditAware implements AuditorAware<Long> {
+    @NotNull
     @Override
-    public Optional<Integer> getCurrentAuditor() {
+    public Optional<Long> getCurrentAuditor() {
         Authentication authentication =
                 SecurityContextHolder
                         .getContext()

@@ -29,86 +29,89 @@ public class TransferService {
 
     public void bankTransfer(TransferRequest transferRequest) {
         TransferValidationUtils transferValidationUtils = new TransferValidationUtils();
-        @NonNull Long fromAccountId = transferRequest.fromAccountId();
-        @NonNull Long toAccountId = transferRequest.toAccountId();
+        @NonNull Long senderAccountId = transferRequest.senderAccountId();
+        @NonNull Long receiverAccountId = transferRequest.receiverAccountId();
         @NonNull BigDecimal amount = transferRequest.amount();
-        Account fromAccount = accountRepository.findById(fromAccountId).orElseThrow();
-        Account toAccount = accountRepository.findById(toAccountId).orElseThrow();
-        String fromAccountCountryCode = fromAccount.getAccountNumber().substring(0, 2);
-        String toAccountCountryCode = toAccount.getAccountNumber().substring(0, 2);
-        Currency fromAccountCurrency = fromAccount.getCurrency();
-        Currency toAccountCurrency = toAccount.getCurrency();
+        Account senderAccount = accountRepository.findById(senderAccountId).orElseThrow();
+        Account receiverAccount = accountRepository.findById(receiverAccountId).orElseThrow();
+        String senderAccountCountryCode = senderAccount.getAccountNumber().substring(0, 2);
+        String receiverAccountCountryCode = receiverAccount.getAccountNumber().substring(0, 2);
+        Currency senderAccountCurrency = senderAccount.getCurrency();
+        Currency receiverAccountCurrency = receiverAccount.getCurrency();
+        String title = transferRequest.title();
 
         transferValidationUtils.amountValidation(amount);
         BigDecimal balance;
-        boolean isDomesticSameCurrencyTransfer = fromAccountCountryCode.equals(toAccountCountryCode)
-                && fromAccountCurrency.equals(toAccountCurrency);
+        boolean isDomesticSameCurrencyTransfer = senderAccountCountryCode.equals(receiverAccountCountryCode)
+                && senderAccountCurrency.equals(receiverAccountCurrency);
         if (isDomesticSameCurrencyTransfer) {
-            balance = fromAccount.getBalance();
-            transferValidationUtils.balanceValidation(balance, fromAccountCurrency, amount);
-            transfer(fromAccount, toAccount, amount);
+            balance = senderAccount.getBalance();
+            transferValidationUtils.balanceValidation(balance, senderAccountCurrency, amount);
+            transfer(senderAccount, receiverAccount, amount, title);
         } else {
-            String transferType = fromAccountCountryCode.equals(toAccountCountryCode) ? "Different currencies."
+            String transferType = senderAccountCountryCode.equals(receiverAccountCountryCode) ? "Different currencies."
                     : "Foreign transfer.";
             log.info(transferType);
-            transferInDifferentCurrencies(fromAccountCurrency, toAccountCurrency, amount, fromAccount, toAccount,
-                    transferValidationUtils);
+            transferInDifferentCurrencies(senderAccountCurrency, receiverAccountCurrency, amount, senderAccount,
+                    receiverAccount, transferValidationUtils, title);
         }
     }
 
-    private void transferInDifferentCurrencies(Currency fromAccountCurrency, Currency toAccountCurrency,
-                                               BigDecimal amount, Account fromAccount, Account toAccount,
-                                               TransferValidationUtils transferValidationUtils) {
-        BigDecimal amountOfTransferCurrency = exchangeAmount(fromAccountCurrency, toAccountCurrency, amount);
-        BigDecimal balance = fromAccount.getBalance();
-        transferValidationUtils.balanceValidation(balance, fromAccountCurrency, amountOfTransferCurrency);
-        transfer(fromAccount, toAccount, amount, amountOfTransferCurrency);
+    private void transferInDifferentCurrencies(Currency senderAccountCurrency, Currency receiverAccountCurrency,
+                                               BigDecimal amount, Account senderAccount, Account receiverAccount,
+                                               TransferValidationUtils transferValidationUtils, String title) {
+        BigDecimal amountOfTransferCurrency = exchangeAmount(senderAccountCurrency, receiverAccountCurrency, amount);
+        BigDecimal balance = senderAccount.getBalance();
+        transferValidationUtils.balanceValidation(balance, senderAccountCurrency, amountOfTransferCurrency);
+        transfer(senderAccount, receiverAccount, amount, amountOfTransferCurrency, title);
     }
 
-    BigDecimal exchangeAmount(Currency fromAccountCurrency, Currency toAccountCurrency, BigDecimal amount) {
-        BigDecimal fromAccountCurrencyExchangeRate = extractCurrencyExchangeRate(fromAccountCurrency);
-        BigDecimal toAccountCurrencyExchangeRate = extractCurrencyExchangeRate(toAccountCurrency);
-        BigDecimal exchangeRate = fromAccountCurrencyExchangeRate.divide(toAccountCurrencyExchangeRate,
+    BigDecimal exchangeAmount(Currency senderAccountCurrency, Currency receiverAccountCurrency, BigDecimal amount) {
+        BigDecimal senderAccountCurrencyExchangeRate = extractCurrencyExchangeRate(senderAccountCurrency);
+        BigDecimal receiverAccountCurrencyExchangeRate = extractCurrencyExchangeRate(receiverAccountCurrency);
+        BigDecimal exchangeRate = senderAccountCurrencyExchangeRate.divide(receiverAccountCurrencyExchangeRate,
                 4, RoundingMode.UP);
         return amount.divide(exchangeRate, 2, RoundingMode.UP);
     }
 
-    public void transfer(Account fromAccount, Account toAccount, BigDecimal amount) {
-        TransferHistory fromAccountTransferHistory =
-                transferHistoryService.buildFromAccountTransferHistory(fromAccount, amount, toAccount);
-        TransferHistory toAccountTransferHistory =
-                transferHistoryService.buildToAccountTransferHistory(toAccount, amount, fromAccount);
+    public void transfer(Account senderAccount, Account receiverAccount, BigDecimal amount, String title) {
+        TransferHistory senderAccountTransferHistory =
+                transferHistoryService.buildSenderAccountTransferHistory(senderAccount, amount, receiverAccount, title);
+        TransferHistory receiverAccountTransferHistory =
+                transferHistoryService.buildReceiverAccountTransferHistory(receiverAccount, amount, senderAccount, title);
 
-        fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
-        toAccount.setBalance(toAccount.getBalance().add(amount));
-        accountRepository.saveAll(List.of(fromAccount, toAccount));
+        senderAccount.setBalance(senderAccount.getBalance().subtract(amount));
+        receiverAccount.setBalance(receiverAccount.getBalance().add(amount));
+        accountRepository.saveAll(List.of(senderAccount, receiverAccount));
 
-        fromAccountTransferHistory.setAfterBalance(fromAccount.getBalance());
-        toAccountTransferHistory.setAfterBalance(toAccount.getBalance());
-        transferHistoryRepository.saveAll(List.of(fromAccountTransferHistory, toAccountTransferHistory));
+        senderAccountTransferHistory.setBalance(senderAccount.getBalance());
+        receiverAccountTransferHistory.setBalance(receiverAccount.getBalance());
+        transferHistoryRepository.saveAll(List.of(senderAccountTransferHistory, receiverAccountTransferHistory));
 
-        log.info("Bank transfer for {} {} has done. First account's balance: {} {}, second account's balance: {} {}.",
-                amount, toAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
-                toAccount.getBalance(), toAccount.getCurrency());
+        log.info("Bank transfer for {} {} has done. Sender account's balance: {} {}, receiver account's balance: {} {}.",
+                amount, receiverAccount.getCurrency(), senderAccount.getBalance(), senderAccount.getCurrency(),
+                receiverAccount.getBalance(), receiverAccount.getCurrency());
     }
 
-    public void transfer(Account fromAccount, Account toAccount, BigDecimal amount, BigDecimal amountOfTransferCurrency) {
-        TransferHistory fromAccountTransferHistory =
-                transferHistoryService.buildFromAccountTransferHistory(fromAccount, amountOfTransferCurrency, toAccount);
-        TransferHistory toAccountTransferHistory =
-                transferHistoryService.buildToAccountTransferHistory(toAccount, amount, fromAccount);
+    public void transfer(Account senderAccount, Account receiverAccount, BigDecimal amount,
+                         BigDecimal amountOfTransferCurrency, String title) {
+        TransferHistory senderAccountTransferHistory =
+                transferHistoryService.buildSenderAccountTransferHistory(senderAccount, amountOfTransferCurrency,
+                        receiverAccount, title);
+        TransferHistory receiverAccountTransferHistory =
+                transferHistoryService.buildReceiverAccountTransferHistory(receiverAccount, amount, senderAccount, title);
 
-        fromAccount.setBalance(fromAccount.getBalance().subtract(amountOfTransferCurrency));
-        toAccount.setBalance(toAccount.getBalance().add(amount));
-        accountRepository.saveAll(List.of(fromAccount, toAccount));
+        senderAccount.setBalance(senderAccount.getBalance().subtract(amountOfTransferCurrency));
+        receiverAccount.setBalance(receiverAccount.getBalance().add(amount));
+        accountRepository.saveAll(List.of(senderAccount, receiverAccount));
 
-        fromAccountTransferHistory.setAfterBalance(fromAccount.getBalance());
-        toAccountTransferHistory.setAfterBalance(toAccount.getBalance());
-        transferHistoryRepository.saveAll(List.of(fromAccountTransferHistory, toAccountTransferHistory));
+        senderAccountTransferHistory.setBalance(senderAccount.getBalance());
+        receiverAccountTransferHistory.setBalance(receiverAccount.getBalance());
+        transferHistoryRepository.saveAll(List.of(senderAccountTransferHistory, receiverAccountTransferHistory));
 
-        log.info("Bank transfer for {} {} has done. First account's balance: {} {}, second account's balance: {} {}.",
-                amount, toAccount.getCurrency(), fromAccount.getBalance(), fromAccount.getCurrency(),
-                toAccount.getBalance(), toAccount.getCurrency());
+        log.info("Bank transfer for {} {} has done. Sender account's balance: {} {}, receiver account's balance: {} {}.",
+                amount, receiverAccount.getCurrency(), senderAccount.getBalance(), senderAccount.getCurrency(),
+                receiverAccount.getBalance(), receiverAccount.getCurrency());
     }
 
     public BigDecimal extractCurrencyExchangeRate(Currency currency) {
