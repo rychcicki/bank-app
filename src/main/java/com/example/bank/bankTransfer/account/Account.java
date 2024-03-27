@@ -3,21 +3,21 @@ package com.example.bank.bankTransfer.account;
 import com.example.bank.client.jpa.Client;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "account_number"))
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class Account {
     @Id
     @SequenceGenerator(name = "account_sequence", sequenceName = "account_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_sequence")
+    @EqualsAndHashCode.Exclude
     private Long id;
     @Column(name = "account_number", nullable = false)
     @NotBlank(message = "Account number is mandatory")

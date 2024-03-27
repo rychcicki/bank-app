@@ -1,7 +1,5 @@
 package com.example.bank.bankTransfer.transfer.history.export;
 
-import com.example.bank.bankTransfer.account.Account;
-import com.example.bank.bankTransfer.account.AccountRepository;
 import com.example.bank.bankTransfer.transfer.history.TransferHistory;
 import com.example.bank.bankTransfer.transfer.history.TransferHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -15,99 +13,92 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 public class XlsxTransferHistoryGenerator {
     private static final String TRANSFER_HISTORY_SHEET_NAME = "Transfer history";
-    private static final String FILE_NAME_PATTERN = "Transfer history client_%d.xlsx";
+    private static final String FILE_NAME_PATTERN = "Transfer history %s.xlsx";
     private static final int DATE_COLUMN_WIDTH = 4900;
     private static final int HORIZONTAL_PADDING = 200;
-    static final List<String> headerCellTitles = List.of("No.", "Created on", "Client ID", "Transfer type",
-            "Bank account numer", "Title of transfer", "Amount", "Balance");
-    private final AccountRepository accountRepository;
+    private static final List<String> HEADER_CELL_TITLES = List.of(
+            "Created on", "Transfer type", "Bank account number", "Title of transfer", "Amount", "Balance");
     private final TransferHistoryService transferHistoryService;
 
-    public void generateXlsxTransferHistory(Long clientId) {
+    public void generateXlsxTransferHistory(String accountNumber) {
         try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = createSheet(workbook);
-            Row headerRow = createHeader(sheet);
-            fillHeaderWithData(headerCellTitles, workbook, headerRow, sheet);
-            Integer rowSize = transferHistoryService.transferHistoryForClient(clientId).size();
-            Sheet rows = createRows(sheet, rowSize);
-            fillRowWithData(clientId, transferHistoryService, accountRepository, rows, workbook);
-            saveWorkbookToFile(workbook, clientId);
+            initializeWorkbook(workbook, accountNumber);
         } catch (IOException ex) {
             throw new RuntimeException("Error generating transfer history XLSX", ex);
         }
     }
 
-    private Sheet createSheet(Workbook workbook) {
-        return workbook.createSheet(TRANSFER_HISTORY_SHEET_NAME);
+    private void initializeWorkbook(Workbook workbook, String accountNumber) {
+        Sheet sheet = workbook.createSheet(TRANSFER_HISTORY_SHEET_NAME);
+        createHeaderRow(sheet);
+        int numberOfTransferHistories = transferHistoryService.transferHistoryForAccountNumber(accountNumber).size();
+        autoSizeColumns(sheet);
+        createDataRows(workbook, numberOfTransferHistories, accountNumber);
+        saveWorkbookToFile(workbook, accountNumber);
     }
 
-    private Sheet createRows(Sheet sheet, Integer rowSize) {
-        for (int i = 1; i <= rowSize; i++) {
-            sheet.createRow(i);
-        }
-        return sheet;
+    private void createHeaderRow(Sheet sheet) {
+        Row headerRow = sheet.createRow(0);
+        CellStyle headerStyle = createStyleForHeader(sheet.getWorkbook());
+        IntStream.range(0, HEADER_CELL_TITLES.size()).forEach(columnIndex -> {
+            Cell cell = headerRow.createCell(columnIndex);
+            cell.setCellValue(HEADER_CELL_TITLES.get(columnIndex));
+            cell.setCellStyle(headerStyle);
+        });
     }
 
-    private Row createHeader(Sheet sheet) {
-        return sheet.createRow(0);
+    private void autoSizeColumns(Sheet sheet) {
+        IntStream.range(0, HEADER_CELL_TITLES.size()).forEach(columnIndex -> {
+            sheet.autoSizeColumn(columnIndex);
+            sheet.setColumnWidth(columnIndex, sheet.getColumnWidth(columnIndex) + HORIZONTAL_PADDING);
+        });
     }
 
-    private void fillHeaderWithData(List<String> headerList, Workbook workbook, Row headerRow, Sheet sheet) {
-        CellStyle headerStyle = createStyleForHeader(workbook);
-        for (int i = 0; i < headerList.size(); i++) {
-            Cell headerCell = headerRow.createCell(i);
-            headerCell.setCellValue(headerList.get(i));
-            headerCell.setCellStyle(headerStyle);
-            sheet.autoSizeColumn(i);
-            sheet.setColumnWidth(i, sheet.getColumnWidth(i) + HORIZONTAL_PADDING);
-        }
-    }
-
-    private void fillRowWithData(Long clientId, TransferHistoryService transferHistoryService,
-                                 AccountRepository accountRepository, Sheet rows, Workbook workbook) {
+    private void createDataRows(Workbook workbook, int rowCount, String accountNumber) {
         CellStyle dateTimeCellStyle = createDateTimeCellStyle(workbook);
         CellStyle decimalCellStyle = createDecimalCellStyle(workbook);
         CellStyle defaultWrapTextStyle = createDefaultWrapTextStyle(workbook);
+        List<TransferHistory> transferHistories = transferHistoryService.transferHistoryForAccountNumber(accountNumber);
+        Sheet sheet = workbook.getSheet(TRANSFER_HISTORY_SHEET_NAME);
+        for (int i = 0; i < rowCount; i++) {
+            Row row = sheet.createRow(i + 1);
+            TransferHistory history = transferHistories.get(i);
+            fillRowWithData(row, history, dateTimeCellStyle, decimalCellStyle, defaultWrapTextStyle);
+        }
+    }
 
-        List<TransferHistory> listOfTransferHistory = transferHistoryService.transferHistoryForClient(clientId);
-        int rowDataIndex = 1;
-        for (TransferHistory history : listOfTransferHistory) {
-            Long bankAccountId = history.getBankAccountId();
-            Account account = accountRepository.findById(bankAccountId).orElseThrow();
-            Cell cell = null;
-
-            List<Object> methodsForInsertingData = methodsForInsertingDataIntoCells(history, account);
-
-            for (int i = 0; i < methodsForInsertingData.size(); i++) {
-                cell = rows.getRow(rowDataIndex).createCell(i);
-                if (methodsForInsertingData.get(i) instanceof LocalDateTime dateTime) {
-                    cell.setCellValue(dateTime);
-                    cell.setCellStyle(dateTimeCellStyle);
-                    rows.setColumnWidth(i, DATE_COLUMN_WIDTH);
-                } else if (methodsForInsertingData.get(i) instanceof Long number) {
-                    cell.setCellValue(number);
-                } else if (methodsForInsertingData.get(i) instanceof String name) {
-                    cell.setCellValue(name);
-                    cell.setCellStyle(defaultWrapTextStyle);
-                } else if (methodsForInsertingData.get(i) instanceof BigDecimal bigDecimal) {
-                    cell.setCellValue(bigDecimal.doubleValue());
-                    cell.setCellStyle(decimalCellStyle);
-                }
+    private void fillRowWithData(Row row, TransferHistory history, CellStyle dateTimeCellStyle,
+                                 CellStyle decimalCellStyle, CellStyle defaultWrapTextStyle) {
+        Cell cell = null;
+        List<Object> methodsForInsertingData = createMethodsForInsertingDataIntoCells(history);
+        for (int i = 0; i < methodsForInsertingData.size(); i++) {
+            cell = row.createCell(i);
+            if (methodsForInsertingData.get(i) instanceof LocalDateTime dateTime) {
+                cell.setCellValue(dateTime);
+                cell.setCellStyle(dateTimeCellStyle);
+                row.getSheet().setColumnWidth(i, DATE_COLUMN_WIDTH);
+            } else if (methodsForInsertingData.get(i) instanceof Long number) {
+                cell.setCellValue(number);
+            } else if (methodsForInsertingData.get(i) instanceof String name) {
+                cell.setCellValue(name);
+                cell.setCellStyle(defaultWrapTextStyle);
+            } else if (methodsForInsertingData.get(i) instanceof BigDecimal bigDecimal) {
+                cell.setCellValue(bigDecimal.doubleValue());
+                cell.setCellStyle(decimalCellStyle);
             }
-            rowDataIndex++;
         }
     }
 
     @NotNull
-    private static List<Object> methodsForInsertingDataIntoCells(TransferHistory history, Account account) {
-        return List.of(history.getId(), history.getCreatedOn(), history.getClientId(),
-                history.getTransferType().toString(),
-                account.getAccountNumber(), history.getTitle(), history.getAmount(), history.getBalance());
+    private static List<Object> createMethodsForInsertingDataIntoCells(TransferHistory history) {
+        return List.of(history.getCreatedOn(), history.getTransferType().toString(),
+                history.getExternalAccountNumber(), history.getTitle(), history.getAmount(), history.getBalance());
     }
 
     @NotNull
@@ -148,8 +139,8 @@ public class XlsxTransferHistoryGenerator {
         return decimalStyle;
     }
 
-    private void saveWorkbookToFile(Workbook workbook, Long clientId) {
-        String fileName = String.format(FILE_NAME_PATTERN, clientId);
+    private void saveWorkbookToFile(Workbook workbook, String accountNumber) {
+        String fileName = String.format(FILE_NAME_PATTERN, accountNumber);
         try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
             workbook.write(outputStream);
         } catch (IOException e) {

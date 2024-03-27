@@ -5,6 +5,7 @@ import com.example.bank.bankTransfer.account.AccountRepository;
 import com.example.bank.bankTransfer.transfer.TransferType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,32 +18,35 @@ public class TransferHistoryService {
     private final AccountRepository accountRepository;
     private final TransferHistoryRepository transferHistoryRepository;
 
-    public List<TransferHistory> transferHistoryForClient(Long clientId) {
-        return transferHistoryRepository.findByClientId(clientId);
+    @NotNull
+    public List<TransferHistory> transferHistoryForAccountNumber(String accountNumber) {
+        return transferHistoryRepository.findByAccountNumber(accountNumber);
     }
 
-    public TransferHistory buildSenderAccountTransferHistory(Account senderAccount, BigDecimal amount,
-                                                             Account receiverAccount, String title) {
+    public TransferHistory buildSenderAccountTransferHistory(Account account, BigDecimal amount,
+                                                             Account externalAccount, String title) {
         return TransferHistory.builder()
                 .transferType(TransferType.EXPENSE)
-                .clientId(senderAccount.getClient().getId())
-                .previousBalance(senderAccount.getBalance())
-                .balance(senderAccount.getBalance())
+                .clientId(account.getClient().getId())
+                .previousBalance(account.getBalance())
+                .balance(account.getBalance())
                 .amount(amount)
-                .bankAccountId(receiverAccount.getId())
+                .accountNumber(account.getAccountNumber())
+                .externalAccountNumber(externalAccount.getAccountNumber())
                 .title(title)
                 .build();
     }
 
-    public TransferHistory buildReceiverAccountTransferHistory(Account receiverAccount, BigDecimal amount,
-                                                               Account senderAccount, String title) {
+    public TransferHistory buildReceiverAccountTransferHistory(Account account, BigDecimal amount,
+                                                               Account externalAccount, String title) {
         return TransferHistory.builder()
                 .transferType(TransferType.INCOME)
-                .clientId(receiverAccount.getClient().getId())
-                .previousBalance(receiverAccount.getBalance())
-                .balance(receiverAccount.getBalance())
+                .clientId(account.getClient().getId())
+                .previousBalance(account.getBalance())
+                .balance(account.getBalance())
                 .amount(amount)
-                .bankAccountId(senderAccount.getId())
+                .accountNumber(account.getAccountNumber())
+                .externalAccountNumber(externalAccount.getAccountNumber())
                 .title(title)
                 .build();
     }

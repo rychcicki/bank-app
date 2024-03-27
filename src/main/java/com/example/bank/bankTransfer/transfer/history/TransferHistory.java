@@ -25,8 +25,10 @@ public class TransferHistory extends AuditorEntity {
     private TransferType transferType;
     @Column(name = "client_id", nullable = false)
     private Long clientId;
-    @Column(name = "bank_account_id", nullable = false)
-    private Long bankAccountId;
+    @Column(name = "account_number", nullable = false)
+    private String accountNumber;
+    @Column(name = "external_account_number", nullable = false)
+    private String externalAccountNumber;
     @Column(name = "before_balance", nullable = false)
     private BigDecimal previousBalance;
     @Column(nullable = false)

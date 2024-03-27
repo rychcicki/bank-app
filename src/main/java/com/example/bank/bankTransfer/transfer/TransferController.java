@@ -1,7 +1,6 @@
 package com.example.bank.bankTransfer.transfer;
 
 import com.example.bank.bankTransfer.transfer.history.export.XlsxTransferHistoryGenerator;
-import com.example.bank.client.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +19,9 @@ class TransferController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/generate-transfer-history/{clientId}")
-    ResponseEntity<Void> generateXlsxTransferHistory(@PathVariable Long clientId) {
-        xlsxTransferHistoryGenerator.generateXlsxTransferHistory(clientId);
+    @PostMapping("/generate-transfer-history/{accountNumber}")
+    ResponseEntity<Void> generateXlsxTransferHistory(@PathVariable String accountNumber) {
+        xlsxTransferHistoryGenerator.generateXlsxTransferHistory(accountNumber);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
