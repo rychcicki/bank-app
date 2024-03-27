@@ -29,7 +29,7 @@ public class Client extends AuditorEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_sequence")
     @Column(nullable = false)
     @EqualsAndHashCode.Exclude
-    private Integer id;
+    private Long id;
     @NotEmpty
     @Column(name = "first_name", nullable = false)
     private String firstName;

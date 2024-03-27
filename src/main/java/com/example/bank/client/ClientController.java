@@ -16,17 +16,17 @@ class ClientController {
     private final ClientService clientService;
 
     @GetMapping("/find/{id}")
-    ResponseEntity<Client> getClient(@PathVariable @Min(1) Integer id) {
+    ResponseEntity<Client> getClient(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(clientService.getClientById(id));
     }
 
     @PutMapping("/update/{id}")
-    ResponseEntity<Client> updateClientById(@PathVariable @Min(1) Integer id, @RequestBody ClientRequest clientRequest) {
+    ResponseEntity<Client> updateClientById(@PathVariable @Min(1) Long id, @RequestBody ClientRequest clientRequest) {
         return ResponseEntity.ok(clientService.updateClientById(id, clientRequest));
     }
 
     @DeleteMapping("/delete/{id}")
-    ResponseEntity<Void> deleteClient(@PathVariable Integer id) {
+    ResponseEntity<Void> deleteClient(@PathVariable Long id) {
         clientService.deleteClient(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
