@@ -1,6 +1,6 @@
 package com.example.bank.client;
 
-import com.example.bank.bankTransfer.account.Account;
+import com.example.bank.bank.transfer.account.Account;
 import com.example.bank.client.jpa.Address;
 import com.example.bank.client.jpa.Client;
 import com.example.bank.security.token.Token;

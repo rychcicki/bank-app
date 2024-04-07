@@ -1,12 +1,12 @@
-package com.example.bank.bankTransfer.transfer;
+package com.example.bank.bank.transfer.transfer;
 
-import com.example.bank.bankTransfer.account.Account;
-import com.example.bank.bankTransfer.account.AccountRepository;
-import com.example.bank.bankTransfer.account.Currency;
-import com.example.bank.bankTransfer.feign.RateClient;
-import com.example.bank.bankTransfer.transfer.history.TransferHistory;
-import com.example.bank.bankTransfer.transfer.history.TransferHistoryRepository;
-import com.example.bank.bankTransfer.transfer.history.TransferHistoryService;
+import com.example.bank.bank.transfer.account.Account;
+import com.example.bank.bank.transfer.account.AccountRepository;
+import com.example.bank.bank.transfer.account.Currency;
+import com.example.bank.bank.transfer.feign.RateClient;
+import com.example.bank.bank.transfer.transfer.history.TransferHistory;
+import com.example.bank.bank.transfer.transfer.history.TransferHistoryRepository;
+import com.example.bank.bank.transfer.transfer.history.TransferHistoryService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

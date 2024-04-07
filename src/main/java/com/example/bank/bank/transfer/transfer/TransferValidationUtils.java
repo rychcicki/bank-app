@@ -1,6 +1,6 @@
-package com.example.bank.bankTransfer.transfer;
+package com.example.bank.bank.transfer.transfer;
 
-import com.example.bank.bankTransfer.account.Currency;
+import com.example.bank.bank.transfer.account.Currency;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

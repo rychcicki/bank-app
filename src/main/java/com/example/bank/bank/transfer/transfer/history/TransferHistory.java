@@ -1,7 +1,7 @@
-package com.example.bank.bankTransfer.transfer.history;
+package com.example.bank.bank.transfer.transfer.history;
 
 import com.example.bank.auditing.AuditorEntity;
-import com.example.bank.bankTransfer.transfer.TransferType;
+import com.example.bank.bank.transfer.transfer.TransferType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;

@@ -1,6 +1,6 @@
-package com.example.bank.bankTransfer.feign;
+package com.example.bank.bank.transfer.feign;
 
-import com.example.bank.bankTransfer.account.Currency;
+import com.example.bank.bank.transfer.account.Currency;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

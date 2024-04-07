@@ -1,4 +1,4 @@
-package com.example.bank.bankTransfer.account;
+package com.example.bank.bank.transfer.account;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

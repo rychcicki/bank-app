@@ -1,7 +1,7 @@
 package com.example.bank.client.jpa;
 
 import com.example.bank.auditing.AuditorEntity;
-import com.example.bank.bankTransfer.account.Account;
+import com.example.bank.bank.transfer.account.Account;
 import com.example.bank.client.Role;
 import com.example.bank.security.token.Token;
 import jakarta.persistence.*;

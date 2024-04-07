@@ -1,8 +1,8 @@
-package com.example.bank.bankTransfer.transfer.history;
+package com.example.bank.bank.transfer.transfer.history;
 
-import com.example.bank.bankTransfer.account.Account;
-import com.example.bank.bankTransfer.account.AccountRepository;
-import com.example.bank.bankTransfer.transfer.TransferType;
+import com.example.bank.bank.transfer.account.Account;
+import com.example.bank.bank.transfer.account.AccountRepository;
+import com.example.bank.bank.transfer.transfer.TransferType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
