@@ -31,7 +31,7 @@ public class ClientService {
     @Setter(AccessLevel.PACKAGE) // only for testing
     private Integer majority;
 
-    Client getClientById(Integer id) {
+    public Client getClientById(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error(noClientInDatabaseLogMessage, id);
@@ -41,7 +41,7 @@ public class ClientService {
         return client;
     }
 
-    Client updateClientById(Integer id, ClientRequest clientRequest) {
+    Client updateClientById(Long id, ClientRequest clientRequest) {
         Client clientToUpdate = clientRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error(noClientInDatabaseLogMessage, id);
@@ -63,7 +63,7 @@ public class ClientService {
         return clientRepository.save(clientToUpdate);
     }
 
-    void deleteClient(Integer id) {
+    void deleteClient(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error(noClientInDatabaseLogMessage, id);

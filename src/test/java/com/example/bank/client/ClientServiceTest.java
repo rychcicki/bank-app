@@ -33,7 +33,7 @@ class ClientServiceTest {
     @ParameterizedTest
     @MethodSource("com.example.bank.client.SourceMethodsForTest#clientOver18YearsOldSource")
     void shouldGetClientAndReturnClientWithId(Client client) {
-        Integer id = client.getId();
+        Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
         Client resultClient = clientService.getClientById(id);
         Assertions.assertEquals(resultClient, client);
@@ -43,7 +43,7 @@ class ClientServiceTest {
     @ParameterizedTest
     @MethodSource("com.example.bank.client.SourceMethodsForTest#clientSource")
     void shouldReturnClientExceptionWhenThereIsNoClientWithId(Client client) {
-        Integer id = client.getId();
+        Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(ClientNotFoundException.class, () -> {
             clientService.getClientById(id);
@@ -54,7 +54,7 @@ class ClientServiceTest {
     @ParameterizedTest
     @MethodSource("com.example.bank.client.SourceMethodsForTest#clientOver18YearsOldUpdateSource")
     void shouldReturnUpdatedClient(Client client, ClientRequest clientRequest, Client updatedClient) {
-        Integer id = 19;
+        Long id = 19L;
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
         when(clientRepository.save(client)).thenReturn(client);
         Client resultClient = clientService.updateClientById(id, clientRequest);
@@ -65,7 +65,7 @@ class ClientServiceTest {
     @ParameterizedTest
     @MethodSource("com.example.bank.client.SourceMethodsForTest#clientRequestOver18YearsOldSource")
     void shouldThrowClientNotFoundExceptionDuringClientUpdateWhenThereIsNoClientWithId(ClientRequest clientRequest) {
-        Integer id = 123456789;
+        Long id = 123456789L;
         when(clientRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(ClientNotFoundException.class, () ->
                 clientService.updateClientById(id, clientRequest));
@@ -77,7 +77,7 @@ class ClientServiceTest {
     void shouldThrowIllegalArgumentExceptionDuringClientUpdateWhenTheClientIsBelow18YearsOld(
             Client client,
             ClientRequest clientRequest) {
-        Integer id = client.getId();
+        Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
         Assertions.assertThrows(IllegalArgumentException.class, () ->
                 clientService.updateClientById(id, clientRequest));
@@ -87,7 +87,7 @@ class ClientServiceTest {
     @ParameterizedTest
     @MethodSource("com.example.bank.client.SourceMethodsForTest#clientSource")
     void shouldDeleteClientWhenGivenId(Client client) {
-        Integer id = client.getId();
+        Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.of(client));
         doNothing().when(clientRepository).delete(client);
         clientService.deleteClient(id);
@@ -98,7 +98,7 @@ class ClientServiceTest {
     @ParameterizedTest
     @MethodSource("com.example.bank.client.SourceMethodsForTest#clientSource")
     void shouldThrowClientNotFoundExceptionWhenThereIsNoClientWithId(Client client) {
-        Integer id = client.getId();
+        Long id = client.getId();
         when(clientRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(ClientNotFoundException.class, () ->
                 clientService.deleteClient(id));
