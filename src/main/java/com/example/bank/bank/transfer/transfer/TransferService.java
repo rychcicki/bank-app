@@ -42,7 +42,7 @@ public class TransferService {
             BigDecimal amountInReceiverCurrency = exchangeAmount(sender.getCurrency(), receiver.getCurrency(), amount);
             transferValidationUtils.balanceValidation(sender.getBalance(), sender.getCurrency(),
                     amountInReceiverCurrency);
-            transfer(sender, receiver, amount, amountInReceiverCurrency, title);
+            transferValidationUtils.balanceValidation(sender.getBalance(), sender.getCurrency(), amountInReceiverCurrency);
         }
     }
 
