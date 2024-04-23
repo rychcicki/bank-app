@@ -2,13 +2,9 @@ package com.example.bank.bank.transfer.transfer;
 
 import com.example.bank.bank.transfer.account.Currency;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-@Slf4j
-@Service
 public class TransferValidationUtils {
     public void amountValidation(@NonNull BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
