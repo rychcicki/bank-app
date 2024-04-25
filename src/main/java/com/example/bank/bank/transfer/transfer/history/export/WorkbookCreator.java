@@ -8,11 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.IntStream;
 
-
 @Getter
 public class WorkbookCreator {
-    private final String transferHistorySheetName = "Transfer history";
-    private final List<String> headerCellTitles = List.of(
+    static final String transferHistorySheetName = "Transfer history";
+    static final List<String> headerCellTitles = List.of(
             "Created on", "Transfer type", "Bank account number", "Title of transfer", "Amount", "Balance");
     private final int horizontalPadding = 200;
     private final int headerIndex = 0;
@@ -20,7 +19,6 @@ public class WorkbookCreator {
 
     @NotNull
     Sheet createSheetWithHeader(String sheetName, List<String> headerCellTitles) {
-        Workbook workbook = getWorkbook();
         int sheetIndex = workbook.getSheetIndex(sheetName);
         if (sheetIndex >= 0) {
             workbook.removeSheetAt(sheetIndex);

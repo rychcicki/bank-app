@@ -18,14 +18,14 @@ public class GlobalExceptionHandler {
     public GlobalExceptionHandler() {
         this.exceptionHandlers = new HashMap<>();
         this.exceptionHandlers.put(ClientNotFoundException.class, this::handleClientNotFoundException);
+        this.exceptionHandlers.put(XlsxGeneratingException.class, this::handleXlsxGeneratingException);
         this.exceptionHandlers.put(IllegalArgumentException.class, this::handleIllegalArgumentException);
         this.exceptionHandlers.put(InvalidCheckDigitException.class, this::handleInternalException);
         this.exceptionHandlers.put(UnsupportedCountryException.class, this::handleInternalException);
-
     }
 
-    @ExceptionHandler({ClientNotFoundException.class, IllegalArgumentException.class, RuntimeException.class,
-            InvalidCheckDigitException.class, UnsupportedCountryException.class})
+    @ExceptionHandler({ClientNotFoundException.class, XlsxGeneratingException.class, IllegalArgumentException.class,
+            RuntimeException.class, InvalidCheckDigitException.class, UnsupportedCountryException.class})
     public ResponseEntity<ApiError> handleException(Exception ex) {
         Function<Exception, ResponseEntity<ApiError>> handler = exceptionHandlers.getOrDefault(ex.getClass(),
                 this::handleInternalException);
@@ -35,6 +35,13 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ApiError> handleClientNotFoundException(Exception ex) {
         ClientNotFoundException exception = (ClientNotFoundException) ex;
         HttpStatus status = HttpStatus.NOT_FOUND;
+        ApiError apiError = new ApiError(status, exception);
+        return new ResponseEntity<>(apiError, status);
+    }
+
+    private ResponseEntity<ApiError> handleXlsxGeneratingException(Exception ex) {
+        XlsxGeneratingException exception = (XlsxGeneratingException) ex;
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         ApiError apiError = new ApiError(status, exception);
         return new ResponseEntity<>(apiError, status);
     }

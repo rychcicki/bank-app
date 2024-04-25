@@ -5,9 +5,7 @@ import com.example.bank.bank.transfer.account.AccountRepository;
 import com.example.bank.bank.transfer.account.Currency;
 import com.example.bank.bank.transfer.feign.RateClient;
 import com.example.bank.bank.transfer.transfer.history.TransferHistory;
-import com.example.bank.bank.transfer.transfer.history.TransferHistoryRepository;
 import com.example.bank.bank.transfer.transfer.history.TransferHistoryService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,11 +16,9 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Getter
 @Slf4j
 public class TransferService {
     private final TransferHistoryService transferHistoryService;
-    private final TransferHistoryRepository transferHistoryRepository;
     private final AccountRepository accountRepository;
     private final RateClient rateClient;
     private final TransferValidationUtils transferValidationUtils;
@@ -44,8 +40,9 @@ public class TransferService {
             transfer(sender, receiver, amount, title);
         } else {
             BigDecimal amountInReceiverCurrency = exchangeAmount(sender.getCurrency(), receiver.getCurrency(), amount);
+            transferValidationUtils.balanceValidation(sender.getBalance(), sender.getCurrency(),
+                    amountInReceiverCurrency);
             transferValidationUtils.balanceValidation(sender.getBalance(), sender.getCurrency(), amountInReceiverCurrency);
-            transfer(sender, receiver, amount, amountInReceiverCurrency, title);
         }
     }
 
@@ -79,7 +76,7 @@ public class TransferService {
                 transferHistoryService.buildSenderAccountTransferHistory(sender, amount, receiver, title);
         TransferHistory receiverHistory =
                 transferHistoryService.buildReceiverAccountTransferHistory(receiver, receiverAmount, sender, title);
-        transferHistoryRepository.saveAll(List.of(senderHistory, receiverHistory));
+        transferHistoryService.saveAll(senderHistory, receiverHistory);
     }
 
     private BigDecimal exchangeAmount(Currency senderCurrency, Currency receiverCurrency, BigDecimal amount) {
@@ -90,7 +87,7 @@ public class TransferService {
     private BigDecimal calculateExchangeRate(Currency senderCurrency, Currency receiverCurrency) {
         BigDecimal senderRate = extractCurrencyExchangeRate(senderCurrency);
         BigDecimal receiverRate = extractCurrencyExchangeRate(receiverCurrency);
-        return senderRate.divide(receiverRate, 4, RoundingMode.HALF_EVEN); //wow!! o tym nie wiedziałem
+        return senderRate.divide(receiverRate, 4, RoundingMode.HALF_EVEN);
     }
 
     private BigDecimal extractCurrencyExchangeRate(Currency currency) {

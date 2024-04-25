@@ -1,9 +1,7 @@
 package com.example.bank.bank.transfer.transfer.history;
 
 import com.example.bank.bank.transfer.account.Account;
-import com.example.bank.bank.transfer.account.AccountRepository;
 import com.example.bank.bank.transfer.transfer.TransferType;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -13,9 +11,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Getter
 public class TransferHistoryService {
-    private final AccountRepository accountRepository;
     private final TransferHistoryRepository transferHistoryRepository;
 
     @NotNull
@@ -49,5 +45,9 @@ public class TransferHistoryService {
                 .externalAccountNumber(externalAccount.getAccountNumber())
                 .title(title)
                 .build();
+    }
+
+    public void saveAll(TransferHistory senderHistory, TransferHistory receiverHistory) {
+        transferHistoryRepository.saveAll(List.of(senderHistory, receiverHistory));
     }
 }
