@@ -19,7 +19,7 @@ import java.util.List;
 public class XlsxTransferHistoryGenerator {
     public static final String FILE_NAME_PATTERN = "Transfer history %s.xlsx";
     private final int DATE_COLUMN_WIDTH = 4900;
-    public final static String XLSX_GENERATING_EXCEPTION_MESSAGE = "Error generating transfer history XLSX";
+    final static String XLSX_GENERATING_EXCEPTION_MESSAGE = "Error generating transfer history XLSX";
     private final TransferHistoryService transferHistoryService;
     private final WorkbookCreator workbookCreator = new WorkbookCreator();
 

@@ -52,13 +52,9 @@ public class XlsxTransferHistoryGeneratorAssert {
     XlsxTransferHistoryGeneratorAssert hasValidHeaderStyle(IndexedColors foregroundColor, FillPatternType fillPatternType,
                                                            HorizontalAlignment horizontalAlignment) {
         Row header = workbook.getSheet(transferHistorySheetName).getRow(headerIndex);
-        List<CellStyle> headerStyles = new ArrayList<>();
-        IntStream.range(header.getFirstCellNum(), header.getLastCellNum())
-                .forEach(columnIndex -> {
-                    CellStyle cellStyle = header.getCell(columnIndex).getCellStyle();
-                    headerStyles.add(cellStyle);
-                });
-        for (CellStyle cellStyle : headerStyles) {
+        for (int i = 0; i < header.getLastCellNum(); i++) {
+            CellStyle cellStyle = header.getCell(i).getCellStyle();
+
             short fillForegroundColor = cellStyle.getFillForegroundColor();
             FillPatternType fillPattern = cellStyle.getFillPattern();
             HorizontalAlignment alignment = cellStyle.getAlignment();

@@ -11,10 +11,11 @@ import java.util.List;
 @Getter
 class XlsxTransferHistoryGeneratorUtils {
     static List<TransferHistory> transferHistoryCreator() {
+        final String accountNumber = "PL54613983300568639363795256";
         TransferHistory transferHistory1 = TransferHistory
                 .builder()
                 .transferType(TransferType.EXPENSE)
-                .externalAccountNumber("PL54613983300568639363795256")
+                .externalAccountNumber(accountNumber)
                 .title("Money for nothing")
                 .amount(BigDecimal.valueOf(152.25))
                 .balance(BigDecimal.valueOf(100.47))
@@ -24,7 +25,7 @@ class XlsxTransferHistoryGeneratorUtils {
         TransferHistory transferHistory2 = TransferHistory
                 .builder()
                 .transferType(TransferType.INCOME)
-                .externalAccountNumber("PL54613983300568639363795256")
+                .externalAccountNumber(accountNumber)
                 .title("Just transfer")
                 .amount(BigDecimal.valueOf(812.85))
                 .balance(BigDecimal.valueOf(999.10))
@@ -34,7 +35,7 @@ class XlsxTransferHistoryGeneratorUtils {
         TransferHistory transferHistory3 = TransferHistory
                 .builder()
                 .transferType(TransferType.EXPENSE)
-                .externalAccountNumber("PL54613983300568639363795256")
+                .externalAccountNumber(accountNumber)
                 .title("Lorem ipsum")
                 .amount(BigDecimal.valueOf(10.72))
                 .balance(BigDecimal.valueOf(3.0))
