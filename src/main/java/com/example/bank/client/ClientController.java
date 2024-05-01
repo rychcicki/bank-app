@@ -12,7 +12,7 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/client")
 @RequiredArgsConstructor
-class ClientController {
+public class ClientController {
     private final ClientService clientService;
 
     @GetMapping("/find/{id}")

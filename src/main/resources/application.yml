@@ -1,6 +1,6 @@
 spring:
-#  profiles:
-#    active: usa
+  profiles:
+    active: test
   datasource:
     url: jdbc:postgresql://localhost/marcin
     username: postgres

@@ -1,14 +1,14 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost/marcin
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
   jpa:
     properties:
       format_sql: true
     defer-datasource-initialization: true
-    database-platform: PostgreSQL
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
     show-sql: false
@@ -19,7 +19,11 @@ spring:
       org.springframework.web: INFO
       guru.springframework.controllers: INFO
       org.hibernate: INFO
+  h2:
+    console:
+      enabled: true
 server:
+  port: 8123
   servlet:
     context-path: /bank
 age-of-majority: 18

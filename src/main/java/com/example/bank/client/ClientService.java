@@ -79,7 +79,7 @@ public class ClientService {
             throw new IllegalStateException("Wrong password.");
         }
         if (!request.newPassword().equals(request.confirmationPassword())) {
-            throw new IllegalStateException("Password are not the same.");
+            throw new IllegalStateException("Passwords are not the same.");
         }
         client.setPassword(passwordEncoder.encode(request.newPassword()));
         clientRepository.save(client);
