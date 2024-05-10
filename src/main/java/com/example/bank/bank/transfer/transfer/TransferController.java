@@ -13,7 +13,7 @@ import static com.example.bank.bank.transfer.transfer.history.export.XlsxTransfe
 @RestController
 @RequestMapping("/transfer")
 @RequiredArgsConstructor
-public class TransferController {
+class TransferController {
     private final TransferService transferService;
     private final XlsxTransferHistoryGenerator xlsxTransferHistoryGenerator;
 

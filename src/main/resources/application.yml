@@ -1,6 +1,6 @@
 spring:
-  profiles:
-    active: test
+#  profiles:
+#    active: usa
   datasource:
     url: jdbc:postgresql://localhost/marcin
     username: postgres
@@ -13,7 +13,7 @@ spring:
       format_sql: true
     defer-datasource-initialization: true
     database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create-drop
     show-sql: true

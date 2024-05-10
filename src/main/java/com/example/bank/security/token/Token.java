@@ -22,7 +22,7 @@ public class Token {
     public boolean revoked;
     public boolean expired;
     @ManyToOne
-    @JoinColumn(name = "client_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "client_id_fk"))
+    @JoinColumn(name = "client_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "client_id_fk_token"))
     @JsonIgnoreProperties("token")
     public Client client;
 }
