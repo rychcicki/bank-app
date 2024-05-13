@@ -52,6 +52,6 @@ securityDefinitions:
     name: Authorization
     in: header
 
-#springdoc:
-#  swagger-ui:
-#    path: /swagger-something.html
+springdoc:
+  swagger-ui:
+    path: /swagger-something.html

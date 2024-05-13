@@ -21,8 +21,8 @@
 //
 //@ExtendWith(SpringExtension.class)
 //@SpringBootTest
-//@ActiveProfiles("test")
 //@ContextConfiguration(classes = AccountSpringBootContext.class)
+//@ActiveProfiles("test")
 //class AccountSpringBootContextIntegrationTest {
 //    @Autowired
 //    private AccountService accountService;

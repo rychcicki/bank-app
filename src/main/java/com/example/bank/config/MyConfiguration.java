@@ -26,4 +26,10 @@ public class MyConfiguration {
                                     RateClient rateClient, TransferValidationUtils transferValidationUtils) {
         return new TransferService(transferHistoryService, accountRepository, rateClient, transferValidationUtils);
     }
+
+    @Bean
+    @RequestScope
+    TransferValidationUtils transferValidationUtils() {
+        return new TransferValidationUtils();
+    }
 }
