@@ -1,6 +1,7 @@
 package com.example.bank.client;
 
 import com.example.bank.client.jpa.Client;
+import com.example.bank.security.auth.AuthenticationService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.security.Principal;
 @RequiredArgsConstructor
 class ClientController {
     private final ClientService clientService;
+    private final AuthenticationService authenticationService;
 
     @GetMapping("/find/{id}")
     ResponseEntity<Client> getClient(@PathVariable @Min(1) Long id) {
@@ -33,7 +35,7 @@ class ClientController {
 
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Principal connectedUser) {
-        clientService.changePassword(request, connectedUser);
+        authenticationService.changePassword(request, connectedUser);
         return ResponseEntity.ok().build();
     }
 }

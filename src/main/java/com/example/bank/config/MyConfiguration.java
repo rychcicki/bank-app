@@ -9,15 +9,14 @@ import com.example.bank.client.ClientService;
 import com.example.bank.client.jpa.ClientRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class MyConfiguration {
     @Bean
     @RequestScope
-    ClientService clientService(ClientRepository clientRepository, PasswordEncoder passwordEncoder) {
-        return new ClientService(clientRepository, passwordEncoder);
+    ClientService clientService(ClientRepository clientRepository) {
+        return new ClientService(clientRepository);
     }
 
     @Bean

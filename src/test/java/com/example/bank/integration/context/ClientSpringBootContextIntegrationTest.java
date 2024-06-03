@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -24,24 +23,14 @@ class ClientSpringBootContextIntegrationTest {
     private ClientService clientService;
     @Autowired
     private ClientRepository clientRepository;
-    //    @Autowired
-//    private AuthenticationService authenticationService;
-//    @Autowired
-//    private TokenRepository tokenRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    //    @Autowired
-//    private JwtService jwtService;
-//    @Autowired
-//    private AuthenticationManager authenticationManager;
     private final String noClientInDatabaseExceptionMessage = "Error. There is no client in database.";
 
 
+    @Sql({"classpath:schema.sql", "classpath:data.sql"})
     @Test
     void something() {
         System.out.println("test test test test");
     }
-
 
     @Sql({"classpath:schema.sql", "classpath:data.sql"})
     @Test
@@ -71,7 +60,7 @@ class ClientSpringBootContextIntegrationTest {
 //                () -> new ClientNotFoundException(noClientInDatabaseExceptionMessage));
 //        Assertions.assertNotNull(clientFromRegistration);
 //    }
-//
+
 //    @Test
 //    void shouldAuthenticateClient() {
 //        String email = "michal.listkiewicz@gmail.com";
@@ -88,5 +77,4 @@ class ClientSpringBootContextIntegrationTest {
 //            softly.assertThat(authenticate.getRefreshToken()).isNotBlank();
 //        });
 //    }
-
 }

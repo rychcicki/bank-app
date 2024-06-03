@@ -9,11 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -22,7 +19,6 @@ import java.time.Period;
 @Slf4j
 public class ClientService {
     private final ClientRepository clientRepository;
-    private final PasswordEncoder passwordEncoder;
     public static final String CLIENT_LESS_THAN_18_YEARS_OLD_MESSAGE = "Client has to be adult.";
     private final String noClientInDatabaseExceptionMessage = "Error. There is no client in database.";
     private final String noClientInDatabaseLogMessage = "There is no client with id={} in database.";
@@ -71,18 +67,5 @@ public class ClientService {
                 });
         clientRepository.delete(client);
         log.info("Client with id={} has been successfully deleted.", id);
-    }
-
-    public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
-        Client client = (Client) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        if (!passwordEncoder.matches(request.currentPassword(), client.getPassword())) {
-            throw new IllegalStateException("Wrong password.");
-        }
-        if (!request.newPassword().equals(request.confirmationPassword())) {
-            throw new IllegalStateException("Passwords are not the same.");
-        }
-        client.setPassword(passwordEncoder.encode(request.newPassword()));
-        clientRepository.save(client);
-        log.info("Password has been successfully changed.");
     }
 }
