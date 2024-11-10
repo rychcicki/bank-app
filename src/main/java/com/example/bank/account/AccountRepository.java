@@ -1,5 +1,6 @@
-package com.example.bank.bank.transfer.account;
+package com.example.bank.account;
 
+import com.example.bank.account.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

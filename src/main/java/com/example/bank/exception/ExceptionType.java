@@ -10,7 +10,8 @@ public enum ExceptionType {
     CLIENT_NOT_FOUND_EXCEPTION("001", "Client not found in database", HttpStatus.NOT_FOUND),
     XLSX_GENERATING_EXCEPTION("002", "Cannot generate transfer history XLSX file",
             HttpStatus.INTERNAL_SERVER_ERROR),
-    ACCOUNT_NOT_FOUND_EXCEPTION("003", "Account not found in database", HttpStatus.NOT_FOUND);
+    ACCOUNT_NOT_FOUND_EXCEPTION("003", "Account not found in database", HttpStatus.NOT_FOUND),
+    INVALID_ACCOUNT_NUMBER("004", "Invalid account number", HttpStatus.BAD_REQUEST),;
 
     private final String errorCode;
     private final String message;

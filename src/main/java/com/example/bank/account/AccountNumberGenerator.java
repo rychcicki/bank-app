@@ -1,17 +1,14 @@
-package com.example.bank.bank.transfer.account;
+package com.example.bank.account;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.example.bank.exception.ExceptionType;
+import com.example.bank.exception.RestException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.iban4j.*;
-import org.springframework.beans.factory.annotation.Value;
 
-@Slf4j
-@RequiredArgsConstructor
-public class AccountNumberGenerator {
-    @Value("${my-bank-code}")
-    @Getter
-    private static String MY_BANK_CODE;
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+class AccountNumberGenerator {
+    private static final String MY_BANK_CODE = "575";
 
     static Iban polishIbanGenerator() {
         return Iban.random(CountryCode.PL);
@@ -24,19 +21,16 @@ public class AccountNumberGenerator {
     static Iban foreignIbanGenerator() {
         CountryCode countryCode = Iban.random().getCountryCode();
         if (!countryCode.equals(CountryCode.PL)) {
-            Iban foreignIban = new Iban.Builder().countryCode(countryCode).buildRandom();
-            log.info("Foreign country account number (IBAN): {}", foreignIban);
-            return foreignIban;
+            return new Iban.Builder().countryCode(countryCode).buildRandom();
         }
         return foreignIbanGenerator();
     }
 
     static void accountNumberValidator(String iban) {
-        log.info("Account number (IBAN): {} is valid.", iban);
         try {
             IbanUtil.validate(iban);
         } catch (IbanFormatException | InvalidCheckDigitException | UnsupportedCountryException e) {
-            log.error("Invalid account number (IBAN): {}", iban);
+            throw new RestException(ExceptionType.INVALID_ACCOUNT_NUMBER);
         }
     }
 }

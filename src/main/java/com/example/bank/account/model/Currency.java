@@ -1,4 +1,4 @@
-package com.example.bank.bank.transfer.account;
+package com.example.bank.account.model;
 
 public enum Currency {
     PLN,
