@@ -1,72 +1,82 @@
-package com.example.bank.client.jpa;
+package com.example.bank.client.model;
 
+import com.example.bank.account.model.Account;
 import com.example.bank.auditing.AuditorEntity;
-import com.example.bank.bank.transfer.account.Account;
-import com.example.bank.client.Role;
 import com.example.bank.security.token.Token;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
+@ToString(exclude = {"token", "account"})
+@JsonIgnoreProperties(value = {"token", "account"})
 public class Client extends AuditorEntity implements UserDetails {
     @Id
-    @SequenceGenerator(name = "client_sequence", sequenceName = "client_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_sequence")
-    @Column(nullable = false)
-    @EqualsAndHashCode.Exclude
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotEmpty
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
-    @Column(name = "last_name", nullable = false)
-    @NotBlank(message = "lastName is mandatory")
-    private String lastName;
-    @Column(name = "birth_date", nullable = false)
+
+    @NotBlank(message = "firstname is mandatory")
+    private String firstname;
+
+    @NotBlank(message = "lastname is mandatory")
+    private String lastname;
+
+    @NotNull
     private LocalDate birthDate;
-    @Column(nullable = false)
-    @Email(message = "invalid email address")
-    @NotBlank(message = "email is mandatory")
+
+    @Email(regexp = "^[^@]+@[^@]+\\.[^@]+$", message = "invalid email address")
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @NotBlank
     private String password;
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     @OneToMany
     @JoinColumn(name = "client_id")
-    private List<Token> token;
+    private Set<Token> token;
+
     @Embedded
     private Address address;
-    @OneToMany
-    private List<Account> account;
 
-    public Client(String firstName, String lastName, LocalDate birthDate, String email, String password,
+    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<Account> account;
+
+    public Client(String firstname, String lastname, LocalDate birthDate, String email, String password,
                   Address address) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.birthDate = birthDate;
         this.email = email;
         this.password = password;
         this.role = Role.USER;
+        this.status = Status.ACTIVE;
         this.address = address;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities();
+        return role == null ? null : List.of(role);
     }
 
     @Override
