@@ -30,7 +30,7 @@ class AccountNumberGenerator {
         try {
             IbanUtil.validate(iban);
         } catch (IbanFormatException | InvalidCheckDigitException | UnsupportedCountryException e) {
-            throw new RestException(ExceptionType.INVALID_ACCOUNT_NUMBER);
+            throw new RestException(ExceptionType.INVALID_ACCOUNT_NUMBER_EXCEPTION);
         }
     }
 }

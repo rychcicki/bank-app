@@ -12,15 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,10 +55,10 @@ public class ClientServiceImpl implements ClientService {
                 .orElseThrow(() -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
     }
 
-    public List<ClientDTO> findClients() {
+    public Set<ClientDTO> findClients() {
         return clientRepository.findAllByStatus(status).stream()
                 .map(clientMapper::clientToDto)
-                .toList();
+                .collect(Collectors.toSet());
     }
 
     public ClientDTO updateClient(Long id, ClientRequest clientRequest) {
@@ -96,11 +95,4 @@ public class ClientServiceImpl implements ClientService {
         }
         return clientMapper.clientToDto(client);
     }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-
 }

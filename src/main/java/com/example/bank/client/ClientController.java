@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/client")
@@ -23,7 +24,7 @@ class ClientController {
     }
 
     @GetMapping
-    List<ClientDTO> getClients() {
+    Set<ClientDTO> getClients() {
         return clientService.findClients();
     }
 

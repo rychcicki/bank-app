@@ -3,6 +3,7 @@ package com.example.bank.account;
 import com.example.bank.account.model.Account;
 import com.example.bank.account.model.AccountType;
 import com.example.bank.account.model.Currency;
+import com.example.bank.client.ClientRepository;
 import com.example.bank.client.ClientService;
 import com.example.bank.client.model.Client;
 import com.example.bank.exception.ExceptionType;
@@ -27,7 +28,7 @@ public class AccountService {
         String accountNumber = AccountNumberGenerator.myBankIbanGenerator().toString();
         AccountNumberGenerator.accountNumberValidator(accountNumber);
 
-        Client client = clientService.getClientById(clientId);
+        Client client = clientService.findClient(clientId);
         Account myBankAccount = new Account();
         myBankAccount.setAccountNumber(accountNumber);
         myBankAccount.setCurrency(Currency.PLN);
@@ -41,7 +42,7 @@ public class AccountService {
         String accountNumber = AccountNumberGenerator.polishIbanGenerator().toString();
         AccountNumberGenerator.accountNumberValidator(accountNumber);
 
-        Client client = clientService.getClientById(clientId);
+        Client client = clientService.findClient(clientId);
         Account polishAccount = new Account();
         polishAccount.setAccountNumber(accountNumber);
         polishAccount.setCurrency(Currency.PLN);
@@ -61,7 +62,8 @@ public class AccountService {
         CountryCode countryCode = iban.getCountryCode();
         setOfficialCurrency(countryCode, foreignAccountWithOfficialCurrency);
         foreignAccountWithOfficialCurrency.setType(AccountType.CURRENT_ACCOUNT);
-        Client client = clientService.getClientById(clientId);
+
+        Client client = clientService.findClient(clientId);
         foreignAccountWithOfficialCurrency.setClient(client);
         accountRepository.save(foreignAccountWithOfficialCurrency);
         return accountMapper.accountToDTO(foreignAccountWithOfficialCurrency);

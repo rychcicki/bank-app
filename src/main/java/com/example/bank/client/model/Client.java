@@ -2,7 +2,6 @@ package com.example.bank.client.model;
 
 import com.example.bank.account.model.Account;
 import com.example.bank.auditing.AuditorEntity;
-import com.example.bank.security.token.Token;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -23,8 +22,8 @@ import java.util.Set;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-@ToString(exclude = {"token", "account"})
-@JsonIgnoreProperties(value = {"token", "account"})
+@ToString(exclude = "account")
+@JsonIgnoreProperties(value = "account")
 public class Client extends AuditorEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,10 +50,6 @@ public class Client extends AuditorEntity implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    @OneToMany
-    @JoinColumn(name = "client_id")
-    private Set<Token> token;
 
     @Embedded
     private Address address;
