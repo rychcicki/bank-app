@@ -14,7 +14,10 @@ public enum ExceptionType {
     INVALID_ACCOUNT_NUMBER_EXCEPTION("004", "Invalid account number", HttpStatus.BAD_REQUEST),
     INVALID_MAJORITY_EXCEPTION("005", "Client has to be adult", HttpStatus.BAD_REQUEST),
     INVALID_REQUEST_EXCEPTION("006", "Request validation failed", HttpStatus.BAD_REQUEST),
-    CLIENT_ALREADY_EXISTS_EXCEPTION("007", "Email already exists", HttpStatus.CONFLICT);
+    CLIENT_ALREADY_EXISTS_EXCEPTION("007", "Email already exists", HttpStatus.CONFLICT),
+    INVALID_JWT_EXCEPTION("008", "Invalid token", HttpStatus.UNAUTHORIZED),
+    WRONG_PASSWORD_EXCEPTION("009", "Wrong password", HttpStatus.UNAUTHORIZED),
+    PASSWORD_NOT_MATCHING_EXCEPTION("010", "Passwords are not the same", HttpStatus.UNAUTHORIZED);
 
     private final String errorCode;
     private final String message;
