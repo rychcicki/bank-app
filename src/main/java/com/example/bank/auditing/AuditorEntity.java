@@ -4,6 +4,8 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -14,6 +16,8 @@ import java.time.LocalDateTime;
 
 @Data
 @MappedSuperclass
+@SuperBuilder
+@NoArgsConstructor
 @EqualsAndHashCode(exclude = {"updateOn", "updatedBy"})
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditorEntity {

@@ -17,7 +17,9 @@ public enum ExceptionType {
     CLIENT_ALREADY_EXISTS_EXCEPTION("007", "Email already exists", HttpStatus.CONFLICT),
     INVALID_JWT_EXCEPTION("008", "Invalid token", HttpStatus.UNAUTHORIZED),
     WRONG_PASSWORD_EXCEPTION("009", "Wrong password", HttpStatus.UNAUTHORIZED),
-    PASSWORD_NOT_MATCHING_EXCEPTION("010", "Passwords are not the same", HttpStatus.UNAUTHORIZED);
+    PASSWORD_NOT_MATCHING_EXCEPTION("010", "Passwords are not the same", HttpStatus.UNAUTHORIZED),
+    BALANCE_INSUFFICIENT_EXCEPTION("011","Insufficient balance to complete the transaction",
+            HttpStatus.PAYMENT_REQUIRED);
 
     private final String errorCode;
     private final String message;

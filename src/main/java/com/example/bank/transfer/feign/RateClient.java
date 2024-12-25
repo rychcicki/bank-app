@@ -1,6 +1,6 @@
-package com.example.bank.bank.transfer.feign;
+package com.example.bank.transfer.feign;
 
-import com.example.bank.bank.transfer.account.Currency;
+import com.example.bank.account.model.Currency;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

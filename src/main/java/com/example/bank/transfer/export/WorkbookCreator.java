@@ -1,9 +1,8 @@
-package com.example.bank.bank.transfer.transfer.history.export;
+package com.example.bank.transfer.export;
 
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -17,12 +16,9 @@ public class WorkbookCreator {
     private final int headerIndex = 0;
     private final Workbook workbook = new XSSFWorkbook();
 
-    @NotNull
     Sheet createSheetWithHeader(String sheetName, List<String> headerCellTitles) {
         int sheetIndex = workbook.getSheetIndex(sheetName);
-        if (sheetIndex >= 0) {
-            workbook.removeSheetAt(sheetIndex);
-        }
+        if (sheetIndex >= 0) workbook.removeSheetAt(sheetIndex);
         Sheet sheet = workbook.createSheet(sheetName);
         createHeaderRow(sheet, headerCellTitles);
         return sheet;
@@ -38,7 +34,6 @@ public class WorkbookCreator {
         });
     }
 
-    @NotNull
     private CellStyle createStyleForHeader(Workbook workbook) {
         CellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -57,14 +52,12 @@ public class WorkbookCreator {
         });
     }
 
-    @NotNull
     CellStyle createDefaultWrapTextStyle(Workbook workbook) {
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
         return cellStyle;
     }
 
-    @NotNull
     CellStyle createDateTimeCellStyle(Workbook workbook) {
         String dbFormatPattern = "YYYY-MMM-dd HH:mm:ss";
         CellStyle style = workbook.createCellStyle();
@@ -74,7 +67,6 @@ public class WorkbookCreator {
         return style;
     }
 
-    @NotNull
     CellStyle createDecimalCellStyle(Workbook workbook) {
         String decimalFormatPattern = "#,##0.00";
         CellStyle decimalStyle = workbook.createCellStyle();

@@ -1,5 +1,6 @@
-package com.example.bank.bank.transfer.transfer.history;
+package com.example.bank.transfer;
 
+import com.example.bank.transfer.model.TransferHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
