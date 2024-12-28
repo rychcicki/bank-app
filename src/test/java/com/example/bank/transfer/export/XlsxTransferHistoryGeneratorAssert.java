@@ -1,6 +1,6 @@
-package com.example.bank.bank.transfer.transfer.history.export;
+package com.example.bank.transfer.export;
 
-import com.example.bank.bank.transfer.transfer.history.TransferHistory;
+import com.example.bank.transfer.model.TransferHistory;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.assertj.core.api.Assertions;
@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static com.example.bank.transfer.export.WorkbookCreator.headerCellTitles;
+import static com.example.bank.transfer.export.WorkbookCreator.transferHistorySheetName;
 import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredArgsConstructor
 public class XlsxTransferHistoryGeneratorAssert {
     private final int headerIndex = 0;
     private final Workbook workbook;
-    private final String transferHistorySheetName = WorkbookCreator.transferHistorySheetName;
-    private final List<String> headerCellTitles = WorkbookCreator.headerCellTitles;
 
     static XlsxTransferHistoryGeneratorAssert assertThat(Workbook workbook) {
         return new XlsxTransferHistoryGeneratorAssert(workbook);

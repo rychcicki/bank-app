@@ -1,14 +1,15 @@
-package com.example.bank.bank.transfer.transfer.history.export;
+package com.example.bank.transfer.export;
 
-import com.example.bank.bank.transfer.transfer.TransferType;
-import com.example.bank.bank.transfer.transfer.history.TransferHistory;
-import lombok.Getter;
+import com.example.bank.transfer.model.TransferHistory;
+import com.example.bank.transfer.model.TransferType;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class XlsxTransferHistoryGeneratorUtils {
     static List<TransferHistory> transferHistoryCreator() {
         final String accountNumber = "PL54613983300568639363795256";
@@ -19,8 +20,8 @@ class XlsxTransferHistoryGeneratorUtils {
                 .title("Money for nothing")
                 .amount(BigDecimal.valueOf(152.25))
                 .balance(BigDecimal.valueOf(100.47))
+                .createdOn(LocalDateTime.of(2024, 10, 5, 13, 10, 34))
                 .build();
-        transferHistory1.setCreatedOn(LocalDateTime.of(2024, 10, 5, 13, 10, 34));
 
         TransferHistory transferHistory2 = TransferHistory
                 .builder()
@@ -29,8 +30,8 @@ class XlsxTransferHistoryGeneratorUtils {
                 .title("Just transfer")
                 .amount(BigDecimal.valueOf(812.85))
                 .balance(BigDecimal.valueOf(999.10))
+                .createdOn(LocalDateTime.of(2024, 8, 12, 15, 20, 7))
                 .build();
-        transferHistory2.setCreatedOn(LocalDateTime.of(2024, 8, 12, 15, 20, 7));
 
         TransferHistory transferHistory3 = TransferHistory
                 .builder()
@@ -39,8 +40,8 @@ class XlsxTransferHistoryGeneratorUtils {
                 .title("Lorem ipsum")
                 .amount(BigDecimal.valueOf(10.72))
                 .balance(BigDecimal.valueOf(3.0))
+                .createdOn(LocalDateTime.of(2024, 2, 1, 10, 0, 0))
                 .build();
-        transferHistory3.setCreatedOn(LocalDateTime.of(2024, 2, 1, 10, 0, 0));
 
         return List.of(transferHistory1, transferHistory2, transferHistory3);
     }
