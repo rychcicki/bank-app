@@ -4,27 +4,32 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
-  main:
-    allow-bean-definition-overriding: true
+
   jpa:
-    properties:
-      format_sql: true
-    defer-datasource-initialization: true
-    database-platform: PostgreSQL
+    database: postgresql
     hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-  logging:
-    pattern:
-      console: "%msg%n"
-    level:
-      org.springframework.web: INFO
-      guru.springframework.controllers: INFO
-      org.hibernate: INFO
+      ddl-auto: none
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          rateClient:
+            url: "https://api.nbp.pl/api/exchangerates/rates/a/"
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: WARN
+    org.hibernate: WARN
+
 server:
   servlet:
     context-path: /bank
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
 age-of-majority: 21
-#springdoc:
-#  swagger-ui:
-#    path: /swagger-something.html
