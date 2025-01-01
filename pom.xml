@@ -8,7 +8,6 @@
         <version>3.2.3</version>
         <relativePath/>
     </parent>
-    <!-- lookup parent from repository -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.example</groupId>
     <artifactId>bank</artifactId>
@@ -19,7 +18,8 @@
     <properties>
         <assertj-core.version>3.24.2</assertj-core.version>
         <iban4j.version>3.2.7-RELEASE</iban4j.version>
-        <jackson-datatype-jsr310.version>2.14.2</jackson-datatype-jsr310.version>
+        <jackson-annotations.version>2.18.1</jackson-annotations.version>
+        <jackson-datatype-jsr310.version>2.18.1</jackson-datatype-jsr310.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <java.version>17</java.version>
         <jjwt-api.version>0.11.5</jjwt-api.version>
@@ -51,6 +51,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-annotations.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson-datatype-jsr310.version}</version>
@@ -58,8 +63,8 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
-        <!--            <scope>test</scope>-->
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-okhttp</artifactId>

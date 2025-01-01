@@ -8,7 +8,11 @@ spring:
   jpa:
     database: postgresql
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
+    show-sql: true
+    properties:
+      format_sql: true
+    defer-datasource-initialization: true
 
   cloud:
     openfeign:
@@ -19,9 +23,11 @@ spring:
 
 logging:
   level:
-    root: INFO
-    org.springframework.web: WARN
-    org.hibernate: WARN
+    root: DEBUG
+    org.springframework.web: INFO
+    guru.springframework.controllers: DEBUG
+    org.hibernate: INFO
+    org.springframework.security: DEBUG
 
 server:
   servlet:
@@ -33,3 +39,7 @@ application:
       secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
 
 age-of-majority: 18
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
