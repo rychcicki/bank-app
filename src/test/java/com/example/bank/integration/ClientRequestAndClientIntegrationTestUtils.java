@@ -1,9 +1,8 @@
 package com.example.bank.integration;
 
 import com.example.bank.client.ClientRequest;
-import com.example.bank.client.Role;
-import com.example.bank.client.jpa.Address;
-import com.example.bank.client.jpa.Client;
+import com.example.bank.client.model.Address;
+import com.example.bank.client.model.Client;
 
 import java.time.LocalDate;
 
@@ -12,7 +11,7 @@ public class ClientRequestAndClientIntegrationTestUtils {
         return new ClientRequest("Michal", "Listkiewicz",
                 LocalDate.now().minusYears(18), "michal.listkiewicz@gmail.com",
                 new Address("Ku Ujsciu", "1", "67-890", "Gdynia"),
-                "password", Role.USER);
+                "password");
     }
 
     public static Client clientIntegrationTestBuilder() {

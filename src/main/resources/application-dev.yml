@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost/marcin
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      format_sql: true
+    defer-datasource-initialization: true
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          rateClient:
+            url: "https://api.nbp.pl/api/exchangerates/rates/a/"
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework.web: INFO
+    guru.springframework.controllers: DEBUG
+    org.hibernate: INFO
+    org.springframework.security: DEBUG
+
+server:
+  servlet:
+    context-path: /bank
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
+age-of-majority: 18
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

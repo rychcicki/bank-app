@@ -1,39 +1,41 @@
 package com.example.bank.client;
 
-import com.example.bank.client.jpa.Client;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/client")
 @RequiredArgsConstructor
-public class ClientController {
-    private final ClientService clientService;
+@PreAuthorize("hasAnyAuthority('ADMIN')")
+class ClientController {
+    private final ClientServiceImpl clientService;
 
-    @GetMapping("/find/{id}")
-    ResponseEntity<Client> getClient(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.ok(clientService.getClientById(id));
+    @PostMapping
+    ClientDTO createClient(@RequestBody ClientRequest clientRequest) {
+        return clientService.createClient(clientRequest);
     }
 
-    @PutMapping("/update/{id}")
-    ResponseEntity<Client> updateClientById(@PathVariable @Min(1) Long id, @RequestBody ClientRequest clientRequest) {
-        return ResponseEntity.ok(clientService.updateClientById(id, clientRequest));
+    @GetMapping("{id}")
+    ClientDTO getClient(@PathVariable @Min(1) Long id) {
+        return clientService.findClientAsDtoById(id);
     }
 
-    @DeleteMapping("/delete/{id}")
-    ResponseEntity<Void> deleteClient(@PathVariable Long id) {
+    @GetMapping
+    Set<ClientDTO> getClients() {
+        return clientService.findClients();
+    }
+
+    @PutMapping("{id}")
+    ClientDTO updateClient(@PathVariable @Min(1) Long id, @RequestBody ClientRequest clientRequest) {
+        return clientService.updateClient(id, clientRequest);
+    }
+
+    @DeleteMapping("{id}")
+    void deleteClient(@PathVariable Long id) {
         clientService.deleteClient(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @PatchMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Principal connectedUser) {
-        clientService.changePassword(request, connectedUser);
-        return ResponseEntity.ok().build();
     }
 }

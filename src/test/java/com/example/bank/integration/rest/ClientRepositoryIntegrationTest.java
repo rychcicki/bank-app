@@ -1,8 +1,10 @@
 package com.example.bank.integration.rest;
 
-import com.example.bank.client.jpa.Client;
-import com.example.bank.client.jpa.ClientRepository;
-import com.example.bank.exception.ClientNotFoundException;
+import com.example.bank.client.model.Client;
+import com.example.bank.client.ClientRepository;
+import com.example.bank.client.model.Status;
+import com.example.bank.exception.ExceptionType;
+import com.example.bank.exception.RestException;
 import com.example.bank.integration.ClientRequestAndClientIntegrationTestUtils;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 public class ClientRepositoryIntegrationTest {
     @Autowired
     private ClientRepository clientRepository;
-    private final String noClientInDatabaseExceptionMessage = "Error. There is no client in database.";
     private final Client testClient = ClientRequestAndClientIntegrationTestUtils.clientIntegrationTestBuilder();
 
     @BeforeEach
@@ -25,7 +26,7 @@ public class ClientRepositoryIntegrationTest {
     @Test
     void shouldFindClientByIdInRepository() {
         Client clientFromRepo = clientRepository.findById(testClient.getId()).orElseThrow(
-                () -> new ClientNotFoundException(noClientInDatabaseExceptionMessage));
+                () -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(clientFromRepo).isNotNull();
@@ -35,8 +36,8 @@ public class ClientRepositoryIntegrationTest {
 
     @Test
     void shouldFindClientByEmailInRepository() {
-        Client clientFromRepo = clientRepository.findByEmail(testClient.getEmail()).orElseThrow(
-                () -> new ClientNotFoundException(noClientInDatabaseExceptionMessage));
+        Client clientFromRepo = clientRepository.findByStatusAndEmail(Status.ACTIVE,testClient.getEmail()).orElseThrow(
+                () -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(clientFromRepo).isNotNull();

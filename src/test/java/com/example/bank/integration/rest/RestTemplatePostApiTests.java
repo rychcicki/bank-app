@@ -1,6 +1,6 @@
 package com.example.bank.integration.rest;
 
-import com.example.bank.client.jpa.Client;
+import com.example.bank.client.model.Client;
 import com.example.bank.integration.ClientRequestAndClientIntegrationTestUtils;
 import com.example.bank.integration.DemoAppTests;
 import org.junit.jupiter.api.Assertions;

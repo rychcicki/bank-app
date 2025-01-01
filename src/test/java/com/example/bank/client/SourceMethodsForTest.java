@@ -1,42 +1,35 @@
 package com.example.bank.client;
 
-import com.example.bank.client.jpa.Client;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.stream.Stream;
 
-import static com.example.bank.client.ClientRequestServiceUtils.*;
-import static com.example.bank.client.ClientServiceUtils.*;
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class SourceMethodsForTest {
-    static Stream<Arguments> clientBelow18YearsOldSource() {
-        return Stream.of(Arguments.of(clientBelow18YearsOldBuilder(), clientRequestBelow18RequestBuilder()));
+    static Stream<Arguments> argumentsFor18YearsOldClient() {
+        return Stream.of(Arguments.of(ClientServiceUtils.clientAdultBuilder(),
+                        ClientRequestServiceUtils.clientRequestBuilder(),
+                        ClientServiceUtils.updatedClientDtoWithId5Builder()),
+                Arguments.of(ClientServiceUtils.clientExact18YearsOldBuilder(),
+                        ClientRequestServiceUtils.clientRequestExact18YearsOldBuilder(),
+                        ClientServiceUtils.updatedClientExact18YearsOldBuilder()));
     }
 
-    static Stream<ClientRequest> clientRequestBelow18YearsOldSource() {
-        return Stream.of(clientRequestBelow18RequestBuilder()
-        );
+    static Stream<Arguments> argumentsForClientBelow18YearsOld() {
+        return Stream.of(Arguments.of(ClientServiceUtils.clientBelow18YearsOldBuilder(),
+                ClientRequestServiceUtils.clientRequestBelow18YearsOldBuilder()));
     }
 
-    static Stream<Client> clientSource() {
-        return Stream.of(clientBuilder(), clientWithId3Builder(), clientAdultWithId5Builder(),
-                client18YearsOldBuilder(), clientBelow18YearsOldBuilder());
+    static Stream<Arguments> argumentsForClientToClientDto() {
+        return Stream.of(Arguments.of(ClientServiceUtils.clientAdultBuilder(),
+                        ClientServiceUtils.updatedClientDtoWithId5Builder()),
+                Arguments.of(ClientServiceUtils.clientExact18YearsOldBuilder(),
+                        ClientServiceUtils.updatedClientExact18YearsOldBuilder()));
     }
 
-    static Stream<Arguments> clientOver18YearsOldUpdateSource() {
-        return Stream.of(Arguments.of(clientAdultWithId5Builder(), updateClientRequestAdultBuilder(),
-                        resultUpdateClientWithId5Builder()),
-                Arguments.of(client18YearsOldBuilder(), updateClientRequest18YOBuilder(),
-                        resultUpdateClient18YearsOldBuilder()));
-    }
-
-    static Stream<Arguments> clientOver18YearsOldSource() {
-        return Stream.of(Arguments.of(clientAdultWithId5Builder(), clientRequest18YOForRegisterBuilder(),
-                resultOfRegisterClientAdultWithIdBuilder()));
-    }
-
-    static Stream<Arguments> clientRequestOver18YearsOldSource() {
-        return Stream.of(Arguments.of(clientRequest18YOForRegisterBuilder(),
-                resultOfRegisterClientAdultWithIdBuilder()));
+    static Stream<Arguments> argumentsForFindAllClients() {
+        return Stream.of(Arguments.of(ClientServiceUtils.listOfClients(), ClientServiceUtils.listOfClientDTO()));
     }
 }
