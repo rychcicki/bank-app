@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -52,8 +53,8 @@ class ClientServiceUtils {
                 Status.ACTIVE, LocalDateTime.now().toString(), 2L);
     }
 
-    static Set<Client> listOfClients() {
-        return Set.of(clientAdultBuilder(), clientExact18YearsOldBuilder());
+    static List<Client> listOfClients() {
+        return List.of(clientAdultBuilder(), clientExact18YearsOldBuilder());
     }
 
     static Set<ClientDTO> listOfClientDTO() {

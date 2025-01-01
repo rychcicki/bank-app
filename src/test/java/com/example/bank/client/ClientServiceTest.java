@@ -17,7 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -188,13 +189,12 @@ class ClientServiceTest {
     @DisplayName("findClientsTest")
     @ParameterizedTest
     @MethodSource("com.example.bank.client.SourceMethodsForTest#argumentsForFindAllClients")
-    void shouldReturnSetOfClientsDto(Set<Client> clients, Set<ClientDTO> clientDtos) {
-        Iterator<Client> clientIterator = clients.iterator();
-        Iterator<ClientDTO> clientDTOIterator = clientDtos.iterator();
+    void shouldReturnSetOfClientsDto(List<Client> clients, Set<ClientDTO> clientDtos) {
+        List<ClientDTO> clientDTOList = new ArrayList<>(clientDtos);
 
-        while (clientIterator.hasNext() && clientDTOIterator.hasNext()) {
-            Client client = clientIterator.next();
-            ClientDTO clientDTO = clientDTOIterator.next();
+        for (int i = 0; i < clients.size(); i++) {
+            Client client = clients.get(i) /*clientIterator.next()*/;
+            ClientDTO clientDTO = clientDTOList.get(i)/*clientDTOIterator.next()*/;
             when(clientMapper.clientToDto(client)).thenReturn(clientDTO);
         }
 
