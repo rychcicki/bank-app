@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
@@ -15,5 +14,5 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Optional<Client> findByStatusAndId(Status status, Long id);
 
-    Set<Client> findAllByStatus(Status status);
+    List<Client> findAllByStatus(Status status);
 }

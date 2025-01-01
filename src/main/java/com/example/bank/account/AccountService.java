@@ -3,7 +3,6 @@ package com.example.bank.account;
 import com.example.bank.account.model.Account;
 import com.example.bank.account.model.AccountType;
 import com.example.bank.account.model.Currency;
-import com.example.bank.client.ClientRepository;
 import com.example.bank.client.ClientService;
 import com.example.bank.client.model.Client;
 import com.example.bank.exception.ExceptionType;
