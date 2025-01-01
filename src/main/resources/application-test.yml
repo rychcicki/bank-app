@@ -1,25 +1,48 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost/marcin
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
   jpa:
     properties:
+      hibernate:
+        physical-naming-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl
       format_sql: true
     defer-datasource-initialization: true
-    database-platform: PostgreSQL
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-  logging:
-    pattern:
-      console: "%msg%n"
-    level:
-      org.springframework.web: INFO
-      guru.springframework.controllers: INFO
-      org.hibernate: INFO
+      ddl-auto: none
+    show-sql: true
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          rateClient:
+            url: "https://api.nbp.pl/api/exchangerates/rates/a/"
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework.web: INFO
+    guru.springframework.controllers: DEBUG
+    org.hibernate: DEBUG
+    org.springframework.security: DEBUG
+
 server:
+  port: 8080
   servlet:
     context-path: /bank
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
 age-of-majority: 18

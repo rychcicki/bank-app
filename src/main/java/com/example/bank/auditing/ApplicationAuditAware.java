@@ -1,6 +1,6 @@
 package com.example.bank.auditing;
 
-import com.example.bank.client.jpa.Client;
+import com.example.bank.client.model.Client;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -13,10 +13,7 @@ public class ApplicationAuditAware implements AuditorAware<Long> {
     @NotNull
     @Override
     public Optional<Long> getCurrentAuditor() {
-        Authentication authentication =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null ||
                 !authentication.isAuthenticated() ||
                 authentication instanceof AnonymousAuthenticationToken
