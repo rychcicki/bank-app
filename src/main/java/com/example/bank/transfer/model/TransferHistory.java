@@ -2,6 +2,7 @@ package com.example.bank.transfer.model;
 
 import com.example.bank.auditing.AuditorEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -37,7 +38,7 @@ public class TransferHistory extends AuditorEntity {
     @NotNull
     private BigDecimal previousBalance;
 
-    @NotNull(message = "Amount is mandatory")
+    @DecimalMin(value = "0.01", message = "Amount must be at least 0.01")
     private BigDecimal amount;
 
     @Column(nullable = false)

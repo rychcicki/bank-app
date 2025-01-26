@@ -1,7 +1,6 @@
 package com.example.bank.transfer;
 
 import com.example.bank.transfer.export.XlsxTransferHistoryGenerator;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,7 +19,7 @@ class TransferController {
     private final XlsxTransferHistoryGenerator xlsxTransferHistoryGenerator;
 
     @PostMapping("/make-transfer")
-    void bankTransfer(@Valid @RequestBody TransferRequest transferRequest, Principal connectedUser) {
+    void bankTransfer(@RequestBody TransferRequest transferRequest, Principal connectedUser) {
         transferService.processBankTransfer(transferRequest, connectedUser);
     }
 
