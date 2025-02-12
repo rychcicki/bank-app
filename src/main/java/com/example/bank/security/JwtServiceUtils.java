@@ -2,7 +2,6 @@ package com.example.bank.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,9 +9,10 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpHeaders;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -23,28 +23,30 @@ class JwtServiceUtils {
     }
 
     static private Claims extractAllClaims(String token, String secretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        SecretKey signInKey = Keys.hmacShaKeyFor(keyBytes);
+
         return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey(secretKey))
+                .parser()
+                .verifyWith(signInKey)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     static String buildToken(String username, Long expiration, String secretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        SecretKey signInKey = Keys.hmacShaKeyFor(keyBytes);
+        Map<String, Object> claims = new HashMap<>();
+
         return Jwts
                 .builder()
-                .setClaims(new HashMap<>())
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey(secretKey), SignatureAlgorithm.HS256)
+                .claims(claims)
+                .subject(username)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(signInKey, Jwts.SIG.HS256)
                 .compact();
-    }
-
-    private static Key getSignInKey(String secretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     static String extractBearerToken(final HttpServletRequest request) {

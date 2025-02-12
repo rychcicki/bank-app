@@ -193,8 +193,8 @@ class ClientServiceTest {
         List<ClientDTO> clientDTOList = new ArrayList<>(clientDtos);
 
         for (int i = 0; i < clients.size(); i++) {
-            Client client = clients.get(i) /*clientIterator.next()*/;
-            ClientDTO clientDTO = clientDTOList.get(i)/*clientDTOIterator.next()*/;
+            Client client = clients.get(i);
+            ClientDTO clientDTO = clientDTOList.get(i);
             when(clientMapper.clientToDto(client)).thenReturn(clientDTO);
         }
 

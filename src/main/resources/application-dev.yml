@@ -19,7 +19,7 @@ spring:
       client:
         config:
           rateClient:
-            url: "https://api.nbp.pl/api/exchangerates/rates/a/"
+            url: https://api.nbp.pl/api/exchangerates/rates/a/
 
 logging:
   level:

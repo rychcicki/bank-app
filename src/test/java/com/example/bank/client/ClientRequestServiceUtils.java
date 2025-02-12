@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ClientRequestServiceUtils {
+class ClientRequestServiceUtils {
     static ClientRequest clientRequestBuilder() {
         return new ClientRequest("Czeslawa", "Cieslak",
                 LocalDate.of(1938, 6, 10), "czeslawa.cieslak@gmail.com",
@@ -25,6 +25,7 @@ public class ClientRequestServiceUtils {
     public static ClientRequest clientRequestBelow18YearsOldBuilder() {
         return new ClientRequest("Zdzislaw", "Krecina",
                 LocalDate.now().minusYears(17), "zdzislaw.krecina@gmail.com",
-                new Address("Tatrzanska", "7B", "12-456", "Zywiec"), "password");
+                new Address("Tatrzanska", "7B", "12-456", "Zywiec"),
+                "password");
     }
 }
