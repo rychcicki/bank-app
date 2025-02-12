@@ -1,84 +1,64 @@
-create table if not exists CLIENT (
-    id bigint not null AUTO_INCREMENT PRIMARY KEY,
-    first_name varchar(255) not null,
-    last_name varchar(255) not null,
-    email varchar(255) not null,
-    birth_date date not null,
-    password varchar(255),
-    role varchar(255) check (role in ('USER','ADMIN','MANAGER')),
-    street_name varchar(255),
-    street_number varchar(255),
-    zip_code varchar(255),
-    city varchar(255)
+CREATE SEQUENCE IF NOT EXISTS account_sequence START WITH 1 INCREMENT BY 1;
+
+CREATE SEQUENCE IF NOT EXISTS client_sequence START WITH 1 INCREMENT BY 1;
+
+CREATE SEQUENCE IF NOT EXISTS history_generator START WITH 1 INCREMENT BY 1;
+
+CREATE SEQUENCE IF NOT EXISTS token_seq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS CLIENT (
+	birth_date date NOT NULL,
+	created_by int8 NULL,
+	created_on timestamp(6) NULL,
+	id int8  NOT NULL DEFAULT NEXT VALUE FOR client_sequence PRIMARY KEY,
+	update_on timestamp(6) NULL,
+	updated_by int8 NULL,
+	city varchar(255) NULL,
+	email varchar(255) NOT NULL,
+	firstname varchar(255) NOT NULL,
+	lastname varchar(255) NOT NULL,
+	password varchar(255) NULL,
+	role varchar(255) check (role in ('USER','ADMIN')),
+    status varchar(255) check (status in ('ACTIVE','INACTIVE')),
+	street_name varchar(255) NULL,
+	street_number varchar(255) NULL,
+	zip_code varchar(255) NULL,
+	CONSTRAINT client_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS ACCOUNT(
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    account_number varchar(255) not null /*unique*/,
-    currency varchar(255) not null check (currency in ('PLN','USD','EUR', 'GBP', 'CHF', 'AUD', 'NOK')),
-    type varchar(255) not null check (type in ('CURRENT_ACCOUNT', 'SAVINGS_ACCOUNT')),
-    balance numeric(38,2) not null,
-    client_id BIGINT NOT NULL,
-    FOREIGN KEY (client_id) REFERENCES CLIENT(id)
- );
+CREATE TABLE IF NOT EXISTS ACCOUNT (
+	balance numeric(38, 2) NOT NULL,
+	client_id int8 NULL,
+	id int8 NOT NULL DEFAULT NEXT VALUE FOR account_sequence PRIMARY KEY,
+	account_number varchar(255) NOT NULL,
+	currency varchar(255) not null check (currency in ('PLN','USD','EUR', 'GBP', 'CHF', 'AUD', 'NOK')),
+	type varchar(255) not null check (type in ('CURRENT_ACCOUNT', 'SAVINGS_ACCOUNT')),
+	CONSTRAINT account_account_number_key UNIQUE (account_number),
+	CONSTRAINT account_pkey PRIMARY KEY (id),
+	CONSTRAINT client_id_fk FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
+);
 
- CREATE TABLE IF NOT EXISTS TOKEN (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    expired boolean not null,
-    revoked boolean not null,
-    client_id bigint NOT NULL,
-    token varchar(255) /*unique*/,
-    token_type varchar(255) check (token_type in ('BEARER')),
-    FOREIGN KEY (client_id) REFERENCES CLIENT(id)
- );
+CREATE TABLE IF NOT EXISTS REVOKED_TOKEN (
+	id int4 NOT NULL DEFAULT NEXT VALUE FOR token_seq PRIMARY KEY,
+	token varchar(255) NULL,
+	CONSTRAINT token_pkey PRIMARY KEY (id),
+	CONSTRAINT token_token_key UNIQUE (token)
+);
 
---create table if not exists CLIENT (
---    id BIGINT not null PRIMARY KEY,
---    first_name varchar(255) not null,
---    last_name varchar(255) not null,
---    email varchar(255) not null,
---    birth_date date not null,
---    password varchar(255),
---    role varchar(255) check (role in ('USER','ADMIN','MANAGER')),
---    street_name varchar(255),
---    street_number varchar(255),
---    zip_code varchar(255),
---    city varchar(255)
---);
---
---CREATE TABLE IF NOT EXISTS ACCOUNT(
---   id BIGINT NOT NULL PRIMARY KEY,
---    account_number varchar(255) not null unique,
---    currency varchar(255) not null check (currency in ('PLN','USD','EUR', 'GBP', 'CHF', 'AUD', 'NOK')),
---    type varchar(255) not null check (type in ('CURRENT_ACCOUNT', 'SAVINGS_ACCOUNT')),
---    balance numeric(38,2) not null,
---    client_id BIGINT NOT NULL,
---    FOREIGN KEY (client_id) REFERENCES CLIENT(id)
--- );
---
--- CREATE TABLE IF NOT EXISTS TOKEN (
---    id BIGINT NOT NULL PRIMARY KEY,
---    expired boolean not null,
---    revoked boolean not null,
---    client_id bigint NOT NULL,
---    token varchar(255) unique,
---    token_type varchar(255) check (token_type in ('BEARER')),
---    FOREIGN KEY (client_id) REFERENCES CLIENT(id)
--- );
-
----- CREATE TABLE IF NOT EXISTS TRANSFER_HISTORY (
-----    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-----    amount numeric(38,2) not null,
-----    balance numeric(38,2) not null,
-----    before_balance numeric(38,2) not null,
-----    client_id bigint not null,
-----    created_by bigint,
-----    created_on timestamp(6),
-----    update_on timestamp(6),
-----    updated_by bigint,
-----    account_number varchar(255) not null,
-----    external_account_number varchar(255) not null,
-----    local_date_time_pattern varchar(255),
-----    title_of_transfer varchar(255) not null,
-----    transfer_type varchar(255) not null check (transfer_type in ('INCOME','EXPENSE'))
----- );
+CREATE TABLE IF NOT EXISTS TRANSFER_HISTORY (
+	amount numeric(38, 2) NOT NULL,
+	balance numeric(38, 2) NOT NULL,
+	previous_balance numeric(38, 2) NOT NULL,
+	client_id int8 NOT NULL,
+	created_by int8 NULL,
+	created_on timestamp(6) NULL,
+	id int8 NOT NULL DEFAULT NEXT VALUE FOR history_generator PRIMARY KEY,
+	update_on timestamp(6) NULL,
+	updated_by int8 NULL,
+	account_number varchar(255) NOT NULL,
+	external_account_number varchar(255) NOT NULL,
+	local_date_time_pattern varchar(255) NULL,
+	title varchar(255) NOT NULL,
+	transfer_type varchar(255) not null check (transfer_type in ('INCOME','EXPENSE')),
+	CONSTRAINT transfer_history_pkey PRIMARY KEY (id)
+);

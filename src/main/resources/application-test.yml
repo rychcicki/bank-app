@@ -16,12 +16,9 @@ spring:
       ddl-auto: none
     show-sql: true
 
-  cloud:
-    openfeign:
-      client:
-        config:
-          rateClient:
-            url: "https://api.nbp.pl/api/exchangerates/rates/a/"
+  main:
+    allow-bean-definition-overriding: true
+
   h2:
     console:
       enabled: true
@@ -46,3 +43,5 @@ application:
       secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
 
 age-of-majority: 18
+
+spring.cloud.openfeign.client.config.rateClient.url: https://api.nbp.pl/api/exchangerates/rates/a/
