@@ -17,14 +17,14 @@
 
     <properties>
         <assertj-core.version>3.27.3</assertj-core.version>
-        <iban4j.version>3.2.10-RELEASE</iban4j.version>
+        <iban4j.version>3.2.11-RELEASE</iban4j.version>
         <jackson-annotations.version>2.18.2</jackson-annotations.version>
         <jackson-datatype-jsr310.version>2.18.2</jackson-datatype-jsr310.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <java.version>21</java.version>
-        <jjwt-api.version>0.11.5</jjwt-api.version>
-        <jjwt-impl.version>0.11.5</jjwt-impl.version>
-        <jjwt-jackson.version>0.11.5</jjwt-jackson.version>
+        <jjwt-api.version>0.12.6</jjwt-api.version>
+        <jjwt-impl.version>0.12.6</jjwt-impl.version>
+        <jjwt-jackson.version>0.12.6</jjwt-jackson.version>
         <json.version>20250107</json.version>
         <junit-jupiter-api.version>5.11.4</junit-jupiter-api.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
