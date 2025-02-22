@@ -211,7 +211,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>
+                    <argLine>@{argLine}
                         -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar
                     </argLine>
                 </configuration>
@@ -223,6 +223,11 @@
                 <configuration>
                     <excludes>
                         <exclude>**/com/example/bank/exception/GlobalExceptionHandler.class</exclude>
+                        <exclude>**/com/example/bank/security/**</exclude>
+                        <exclude>**/com/example/bank/config/**</exclude>
+                        <exclude>**/com/example/bank/BankApplication.class</exclude>
+                        <exclude>**/com/example/bank/client/ClientMapperImpl.class</exclude>
+                        <exclude>**/com/example/bank/account/AccountMapperImpl.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -233,7 +238,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>prepare-package</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>

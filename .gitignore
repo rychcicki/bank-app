@@ -157,7 +157,7 @@ maven-wrapper-3.2.0.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij
 *.properties
-*.md
+help.md
 mvnw
 *.cmd
 .idea/*.xml

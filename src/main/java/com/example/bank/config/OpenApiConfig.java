@@ -17,13 +17,12 @@ import io.swagger.v3.oas.annotations.servers.Server;
                         email = "phppoznan@gmail.com",
                         url = "https://github.com/rychcicki"
                 ),
-                description = "OpenApi documentation for Bank App",
+                description = "OpenApi documentation for MyBank App",
                 version = "1.0",
                 license = @License(
-                        name = "GNU General Public License",
-                        url = "https://www.gnu.org/licenses/gpl-3.0.html#license-text"
-                ),
-                termsOfService = "Terms of service"
+                        name = "Apache-2.0 license",
+                        url = "https://www.apache.org/licenses/LICENSE-2.0"
+                )
         ),
         servers = {
                 @Server(
