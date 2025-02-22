@@ -17,7 +17,6 @@
 
     <properties>
         <assertj-core.version>3.27.3</assertj-core.version>
-        <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <iban4j.version>3.2.11-RELEASE</iban4j.version>
         <jackson-annotations.version>2.18.2</jackson-annotations.version>
         <jackson-datatype-jsr310.version>2.18.2</jackson-datatype-jsr310.version>
@@ -102,11 +101,6 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eluder.coveralls</groupId>
-            <artifactId>coveralls-maven-plugin</artifactId>
-            <version>${coveralls-maven-plugin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.iban4j</groupId>
@@ -250,6 +244,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+                <configuration>
+                    <repoToken>${env.COVERALLS_REPO_TOKEN}</repoToken>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
