@@ -4,7 +4,7 @@
 ![Dynamic XML Badge for Spring Boot](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2Frychcicki%2Fbank-app%2Fdevelop%2Fpom.xml&query=%2F*%5Blocal-name()%3D'project'%5D%2F*%5Blocal-name()%3D'parent'%5D%2F*%5Blocal-name()%3D'version'%5D&label=Spring%20Boot)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL-purple)
 [![Coverage Status](https://coveralls.io/repos/github/rychcicki/bank-app/badge.svg?branch=develop)](https://coveralls.io/github/rychcicki/bank-app?branch=develop)
-![GitHub](https://img.shields.io/github/license/rychcicki/bank-app?color=brown&label=License&logo=apache&logoColor=white)
+![GitHub](https://img.shields.io/github/license/rychcicki/bank-app?color=brightgreen&label=License&logo=apache&logoColor=white)
 
 
 
