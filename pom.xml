@@ -17,13 +17,10 @@
 
     <properties>
         <assertj-core.version>3.27.3</assertj-core.version>
-        <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
-        <coveralls.repoToken>${env.COVERALLS_REPO_TOKEN}</coveralls.repoToken>
         <iban4j.version>3.2.11-RELEASE</iban4j.version>
         <jackson-annotations.version>2.18.2</jackson-annotations.version>
         <jackson-datatype-jsr310.version>2.18.2</jackson-datatype-jsr310.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-        <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <java.version>21</java.version>
         <jjwt-api.version>0.12.6</jjwt-api.version>
         <jjwt-impl.version>0.12.6</jjwt-impl.version>
@@ -88,11 +85,6 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt-jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>${jakarta.xml.bind-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -223,21 +215,6 @@
                         -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar
                     </argLine>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <version>${coveralls-maven-plugin.version}</version>
-                <configuration>
-                    <repoToken>${coveralls.repoToken}</repoToken>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
