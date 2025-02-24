@@ -85,6 +85,6 @@ Future updates will include new features.
 The *MyBank* application is licensed under the [Apache-2.0 license](https://www.apache.org/licenses/LICENSE-2.0)
 
 ## Contact 🙋‍♂️
-* LinkedIn: [Marcin Wolniewicz](https://www.linkedin.com/in/marcin-wolniewicz-b9aa83165)
+* LinkedIn: [Marcin Wolniewicz](https://www.linkedin.com/in/marcin-wolniewicz-dev)
 
 [Back to top](#table-of-contents)
