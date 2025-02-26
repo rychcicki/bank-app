@@ -7,7 +7,6 @@ import com.example.bank.client.ClientService;
 import com.example.bank.client.model.Client;
 import com.example.bank.exception.ExceptionType;
 import com.example.bank.exception.RestException;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
@@ -17,7 +16,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Getter
 public class AccountService {
     private final AccountRepository accountRepository;
     private final ClientService clientService;
@@ -37,7 +35,7 @@ public class AccountService {
         return accountMapper.accountToDTO(myBankAccount);
     }
 
-    public AccountDTO createPolishAccounts(Long clientId) {
+    public AccountDTO createPolishAccount(Long clientId) {
         String accountNumber = AccountNumberGenerator.polishIbanGenerator().toString();
         AccountNumberGenerator.accountNumberValidator(accountNumber);
 

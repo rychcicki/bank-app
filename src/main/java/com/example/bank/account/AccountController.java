@@ -21,7 +21,7 @@ class AccountController {
 
     @PostMapping("/polish/{clientId}")
     AccountDTO createPolishAccounts(@PathVariable Long clientId) {
-        return accountService.createPolishAccounts(clientId);
+        return accountService.createPolishAccount(clientId);
     }
 
     @PostMapping("/foreign/{clientId}")

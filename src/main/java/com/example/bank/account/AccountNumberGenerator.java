@@ -8,7 +8,7 @@ import org.iban4j.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class AccountNumberGenerator {
-    private static final String MY_BANK_CODE = "575";
+    static final String MY_BANK_CODE = "575";
 
     static Iban polishIbanGenerator() {
         return Iban.random(CountryCode.PL);
