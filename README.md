@@ -12,10 +12,10 @@
 - [Overview](#overview-)
 - [Technology stack](#technology-stack-)
 - [API Endpoints](#api-endpoints-)
-- [Testing](#testing-)
+- [Testing](#testing-%EF%B8%8F)
 - [Future Enhancements](#future-enhancements-)
-- [License](#license-)
-- [Contact](#contact-)
+- [License](#license-%EF%B8%8F)
+- [Contact](#contact-%EF%B8%8F)
 
 ## Overview 📝
 Welcome to the **MyBank** project.
