@@ -35,14 +35,16 @@ class AccountServiceIT {
         AccountDTO myBankAccount = accountService.createMyBankAccount(clientId);
         accountAssertions(myBankAccount, clientId);
         Assertions.assertEquals(myBankAccount.currency(), Currency.PLN);
+        Assertions.assertEquals(myBankAccount.accountNumber().substring(4, 7), AccountNumberGenerator.MY_BANK_CODE);
     }
 
     @Test
     void shouldCreatePolishAccountAndReturnDto() {
         Long clientId = 2L;
-        AccountDTO polishAccount = accountService.createPolishAccounts(clientId);
+        AccountDTO polishAccount = accountService.createPolishAccount(clientId);
         accountAssertions(polishAccount, clientId);
         Assertions.assertEquals(polishAccount.currency(), Currency.PLN);
+        Assertions.assertNotEquals(polishAccount.accountNumber().substring(4, 7), AccountNumberGenerator.MY_BANK_CODE);
     }
 
     @Test
@@ -62,7 +64,7 @@ class AccountServiceIT {
         Assertions.assertEquals(myBankAccountEx.getMessage(), ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage());
 
         RestException polishAccountEx = Assertions.assertThrows(RestException.class,
-                () -> accountService.createPolishAccounts(clientId));
+                () -> accountService.createPolishAccount(clientId));
         Assertions.assertEquals(polishAccountEx.getMessage(), ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage());
 
         RestException foreignAccountEx = Assertions.assertThrows(RestException.class,
