@@ -1,5 +1,6 @@
 package com.example.bank.account;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ class AccountController {
     }
 
     @GetMapping("{number}")
+    @RateLimiter(name = "getAccountByAccountNumber")
     AccountDTO getAccountByAccountNumber(@PathVariable String number) {
         return accountService.findAccountByAccountNumber(number);
     }
