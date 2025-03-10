@@ -33,3 +33,10 @@ application:
       secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
 
 age-of-majority: 18
+
+resilience4j.ratelimiter:
+  instances:
+    getAccountByAccountNumber:
+      limit-for-period: 5
+      limit-refresh-period: 1m
+      timeout-duration: 0
