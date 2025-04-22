@@ -1,6 +1,8 @@
 package com.example.bank.account;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -104,42 +107,20 @@ class AccountControllerIT {
                 );
     }
 
-    @Test
     @WithMockUser(username = "user", authorities = "USER")
-    void shouldReturnForbiddenForUserRole() throws Exception {
-        mockMvc.perform(post("/account/polish/2"))
-                .andExpect(status().isForbidden());
-
-        mockMvc.perform(post("/account/foreign/3"))
-                .andExpect(status().isForbidden());
-
-        mockMvc.perform(get("/account/GB92BARC20038472426896"))
-                .andExpect(status().isForbidden());
-
-        mockMvc.perform(get("/account"))
+    @ParameterizedTest(name = "forbiddenEndpoint: {0}")
+    @MethodSource("com.example.bank.account.AccountServiceUtils#forbiddenEndpointsScenarios")
+    void shouldReturnForbiddenForUserRole(String scenarioMethod,
+                                          MockHttpServletRequestBuilder requestBuilder) throws Exception {
+        mockMvc.perform(requestBuilder)
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    void shouldReturnUnauthorizedForInvalidToken() throws Exception {
-        mockMvc.perform(post("/account/my-bank/1")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer invalidToken"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(post("/account/polish/2")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer invalidToken"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(post("/account/foreign/3")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer invalidToken"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(get("/account/GB92BARC20038472426896")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer invalidToken"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(get("/account")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer invalidToken"))
+    @ParameterizedTest(name = "unauthorizedEndpoint: {0}")
+    @MethodSource("com.example.bank.account.AccountServiceUtils#unauthorizedEndpointsScenarios")
+    void shouldReturnUnauthorizedForInvalidToken(String scenarioMethod,
+                                                 MockHttpServletRequestBuilder requestBuilder) throws Exception {
+        mockMvc.perform(requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer invalidToken"))
                 .andExpect(status().isUnauthorized());
     }
 }
