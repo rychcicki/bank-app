@@ -6,31 +6,43 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.iban4j.*;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-class AccountNumberGenerator {
+final class AccountNumberGenerator {
     static final String MY_BANK_CODE = "575";
 
     static Iban polishIbanGenerator() {
-        return Iban.random(CountryCode.PL);
+        Iban iban = Iban.random(CountryCode.PL);
+        return accountNumberValidator(iban);
     }
 
     static Iban myBankIbanGenerator() {
-        return new Iban.Builder().countryCode(CountryCode.PL).bankCode(MY_BANK_CODE).buildRandom();
+        Iban iban = new Iban.Builder().countryCode(CountryCode.PL).bankCode(MY_BANK_CODE).buildRandom();
+        return accountNumberValidator(iban);
     }
 
     static Iban foreignIbanGenerator() {
-        CountryCode countryCode = Iban.random().getCountryCode();
-        if (!countryCode.equals(CountryCode.PL)) {
-            return new Iban.Builder().countryCode(countryCode).buildRandom();
+        List<CountryCode> countryCodes = Stream.generate(() -> Iban.random().getCountryCode())
+                .limit(10)
+                .filter(code -> !code.getName().equals("Poland"))
+                .toList();
+
+        if (countryCodes.isEmpty()) {
+            throw new RestException(ExceptionType.INVALID_ACCOUNT_NUMBER_EXCEPTION);
         }
-        return foreignIbanGenerator();
+
+        Iban iban = new Iban.Builder().countryCode(countryCodes.getFirst()).buildRandom();
+        return accountNumberValidator(iban);
     }
 
-    static void accountNumberValidator(String iban) {
+    private static Iban accountNumberValidator(Iban iban) {
         try {
-            IbanUtil.validate(iban);
+            IbanUtil.validate(iban.toString());
         } catch (IbanFormatException | InvalidCheckDigitException | UnsupportedCountryException e) {
             throw new RestException(ExceptionType.INVALID_ACCOUNT_NUMBER_EXCEPTION);
         }
+        return iban;
     }
 }

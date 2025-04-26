@@ -8,6 +8,8 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -15,6 +17,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.function.BiConsumer;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = AccountOwnContext.class)
@@ -55,21 +60,15 @@ class AccountServiceIT {
         Assertions.assertNotEquals(foreignAccount.currency(), Currency.PLN);
     }
 
-    @Test
-    void shouldThrowWhenClientNotFound() {
-        Long clientId = 123L;
+    @ParameterizedTest(name = "notCreateAccountWhenClientNotFound: {0}")
+    @MethodSource("com.example.bank.account.AccountServiceUtils#accountCreationActionsScenarios")
+    void shouldThrowExceptionWhenClientNotFound(String scenarioMethod,
+                                                BiConsumer<AccountService, Long> accountCreationMethod) {
+        Long nonExistingClientId = 1234567890L;
 
         RestException myBankAccountEx = Assertions.assertThrows(RestException.class,
-                () -> accountService.createMyBankAccount(clientId));
-        Assertions.assertEquals(myBankAccountEx.getMessage(), ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage());
-
-        RestException polishAccountEx = Assertions.assertThrows(RestException.class,
-                () -> accountService.createPolishAccount(clientId));
-        Assertions.assertEquals(polishAccountEx.getMessage(), ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage());
-
-        RestException foreignAccountEx = Assertions.assertThrows(RestException.class,
-                () -> accountService.createForeignAccount(clientId));
-        Assertions.assertEquals(foreignAccountEx.getMessage(), ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage());
+                () -> accountCreationMethod.accept(accountService, nonExistingClientId));
+        Assertions.assertEquals(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage(), myBankAccountEx.getMessage());
     }
 
     private void accountAssertions(AccountDTO testAccount, Long clientId) {
@@ -78,6 +77,7 @@ class AccountServiceIT {
             softly.assertThat(accountNumber).isNotBlank();
             softly.assertThat(accountRepository.findByAccountNumber(accountNumber).isPresent()).isEqualTo(true);
             softly.assertThat(testAccount.clientId()).isEqualTo(clientId);
+            softly.assertThat(testAccount.balance()).isEqualTo(BigDecimal.ZERO);
         });
     }
 }

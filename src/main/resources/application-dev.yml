@@ -43,3 +43,10 @@ age-of-majority: 18
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+resilience4j.ratelimiter:
+  instances:
+    getAccountByAccountNumber:
+      limit-for-period: 5
+      limit-refresh-period: 1m
+      timeout-duration: 0

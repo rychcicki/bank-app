@@ -45,3 +45,10 @@ application:
 age-of-majority: 18
 
 spring.cloud.openfeign.client.config.rateClient.url: https://api.nbp.pl/api/exchangerates/rates/a/
+
+resilience4j.ratelimiter:
+  instances:
+    getAccountByAccountNumber:
+      limit-for-period: 5
+      limit-refresh-period: 1m
+      timeout-duration: 0
