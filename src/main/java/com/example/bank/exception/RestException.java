@@ -10,4 +10,9 @@ public class RestException extends RuntimeException {
         super(exceptionType.getMessage());
         this.exceptionType = exceptionType;
     }
+
+    public RestException(ExceptionType exceptionType, Throwable cause) {
+        super(exceptionType.getMessage(), cause);
+        this.exceptionType = exceptionType;
+    }
 }
