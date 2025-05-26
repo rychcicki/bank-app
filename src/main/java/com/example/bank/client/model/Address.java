@@ -2,24 +2,20 @@ package com.example.bank.client.model;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Size;
 
 @Embeddable
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Address {
-    @NotBlank
-    private String streetName;
+public record Address(
+        @NotBlank(message = "street name is mandatory")
+        String streetName,
 
-    @NotBlank
-    private String streetNumber;
+        @NotBlank(message = "street number is mandatory")
+        String streetNumber,
 
-    @NotBlank
-    private String zipCode;
+        @NotBlank(message = "zip code must be between 4 and 10 characters")
+        @Size(min = 3, max = 10, message = "zip code must be between 4 and 10 characters")
+        String zipCode,
 
-    @NotBlank
-    private String city;
+        @NotBlank(message = "city is mandatory")
+        String city) {
 }
