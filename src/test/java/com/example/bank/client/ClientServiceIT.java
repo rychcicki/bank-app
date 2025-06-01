@@ -11,19 +11,20 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Set;
 
-import static com.example.bank.client.ClientRequestServiceUtils.clientRequestBuilder;
+import static com.example.bank.client.ClientRequestServiceUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ClientOwnContext.class)
@@ -39,6 +40,7 @@ class ClientServiceIT {
     private ClientRepository clientRepository;
 
     private final ClientRequest clientRequest = clientRequestBuilder();
+    private final ClientUpdateRequest clientUpdateRequest = clientUpdateRequestBuilder();
 
     @Test
     void shouldCreateClientAndReturnClientDto() {
@@ -58,11 +60,11 @@ class ClientServiceIT {
     @Test
     void shouldFindClientAndReturnClientDto() {
         Long id = 1L;
-        ClientDTO clientDTO = clientServiceImpl.findClientAsDtoById(id);
+        ClientDTO clientDTO = clientServiceImpl.findClientAsDto(id);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(clientDTO.id()).isNotNull();
-            softly.assertThat(id).isEqualTo(clientDTO.id());
+            softly.assertThat(clientDTO.id()).isEqualTo(id);
             softly.assertThat(clientRepository.existsById(clientDTO.id())).isTrue();
         });
     }
@@ -85,64 +87,82 @@ class ClientServiceIT {
     void shouldThrowWhenClientNotFound() {
         Long id = 4L;
 
-        RestException exception = Assertions.assertThrows(RestException.class, () -> clientServiceImpl.findClient(id));
-        Assertions.assertEquals(exception.getMessage(), ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage());
+        assertThrowsWithType(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION,
+                () -> clientServiceImpl.findClient(id));
     }
 
     @Test
     void shouldThrowWhenClientIsNotAdult() {
-        ClientRequest request = new ClientRequest("Czeslawa", "Cieslak",
-                LocalDate.of(2018, 6, 10), "czeslawa.cieslak@gmail.com",
-                new Address("Obroncow Warszawy", "31", "57-343", "Lewin Klodzki"),
-                "password");
+        ClientRequest request = clientRequestBelow18YearsOldBuilder();
+        ClientUpdateRequest clientUpdateRequest = clientUpdateRequestBelow18YearsOldBuilder();
         Long id = 22L;
 
-        RestException exception = Assertions.assertThrows(RestException.class,
+        assertThrowsWithType(ExceptionType.INVALID_MAJORITY_EXCEPTION,
                 () -> clientServiceImpl.createClient(request));
-        Assertions.assertEquals(exception.getMessage(), ExceptionType.INVALID_MAJORITY_EXCEPTION.getMessage());
 
-        RestException ex = Assertions.assertThrows(RestException.class,
-                () -> clientServiceImpl.updateClient(id, request));
-        Assertions.assertEquals(ex.getMessage(), ExceptionType.INVALID_MAJORITY_EXCEPTION.getMessage());
+        assertThrowsWithType(ExceptionType.INVALID_MAJORITY_EXCEPTION,
+                () -> clientServiceImpl.updateClient(id, clientUpdateRequest));
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    void shouldThrowWhenClientAlreadyExists() {
-        ClientRequest request = new ClientRequest("Czeslawa", "Cieslak",
-                LocalDate.of(1988, 6, 10), "mike.wazowski@gmail.com",
-                new Address("Obroncow Warszawy", "31", "57-343", "Lewin Klodzki"),
+    void shouldThrowClientAlreadyExistsOnCreate() {
+        //email "bad.randal@gmail.com" already exists in db
+        ClientRequest request = new ClientRequest("Bad", "Randal",
+                LocalDate.now().minusYears(18), "bad.randal@gmail.com",
+                new Address("Street", "1", "11-231", "Tokyo"),
                 "password");
-        Long id = 2L;
 
-        RestException exception = Assertions.assertThrows(RestException.class,
+        assertThrowsWithType(ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION,
                 () -> clientServiceImpl.createClient(request));
-        Assertions.assertEquals(exception.getMessage(), ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION.getMessage());
-
-        RestException ex = Assertions.assertThrows(RestException.class,
-                () -> clientServiceImpl.updateClient(id, request));
-        Assertions.assertEquals(ex.getMessage(), ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION.getMessage());
     }
 
     @Test
-    void shouldFindClientsAndReturnList() {
-        Set<ClientDTO> clients = clientServiceImpl.findClients();
+    void shouldThrowClientAlreadyExistsOnUpdate() {
+        //email "bad.randal@gmail.com" already exists in db
+        ClientUpdateRequest clientUpdateRequest = new ClientUpdateRequest("Bad", "Randal",
+                LocalDate.now().minusYears(18), "bad.randal@gmail.com",
+                new Address("Street", "1", "11-231", "Tokyo"));
+        Long id = 3L;
 
-        Assertions.assertEquals(3, clients.size());
+        assertThrowsWithType(ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION,
+                () -> clientServiceImpl.updateClient(id, clientUpdateRequest));
+    }
+
+    @Test
+    void shouldThrowClientNotFoundExceptionOnUpdate() {
+        final Long id = 789L;
+
+        assertThrowsWithType(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION,
+                () -> clientServiceImpl.updateClient(id, clientUpdateRequest));
+    }
+
+    @Test
+    void shouldReturnAllClientsAsDtoSet() {
+        Set<ClientDTO> clients = clientServiceImpl.findClients();
+        assertEquals(3, clients.size());
+    }
+
+    @Test
+    void shouldReturnEmptySetWhenAllClientsSoftDeleted() {
+        Set.of(1L, 2L, 3L).forEach(clientServiceImpl::softDeleteClient);
+
+        Set<ClientDTO> clients = clientServiceImpl.findClients();
+        assertTrue(clients.isEmpty());
     }
 
     @Test
     void shouldUpdateClientInDatabase() {
         final Long id = 1L;
-        ClientDTO client = clientServiceImpl.updateClient(id, clientRequest);
+
+        ClientDTO client = clientServiceImpl.updateClient(id, clientUpdateRequest);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(client.id()).isNotNull();
-            softly.assertThat(client.firstname()).isEqualTo(clientRequest.firstname());
-            softly.assertThat(client.lastname()).isEqualTo(clientRequest.lastname());
-            softly.assertThat(client.birthDate()).isEqualTo(clientRequest.birthDate());
-            softly.assertThat(client.email()).isEqualTo(clientRequest.email());
-            softly.assertThat(client.address()).isEqualTo(clientRequest.address());
+            softly.assertThat(client.firstname()).isEqualTo(clientUpdateRequest.firstname());
+            softly.assertThat(client.lastname()).isEqualTo(clientUpdateRequest.lastname());
+            softly.assertThat(client.birthDate()).isEqualTo(clientUpdateRequest.birthDate());
+            softly.assertThat(client.email()).isEqualTo(clientUpdateRequest.email());
+            softly.assertThat(client.address()).isEqualTo(clientUpdateRequest.address());
             softly.assertThat(clientRepository.existsById(client.id())).isTrue();
         });
     }
@@ -152,9 +172,22 @@ class ClientServiceIT {
         Long id = 3L;
 
         Assertions.assertTrue(clientRepository.existsById(id));
-        clientServiceImpl.deleteClient(id);
+        clientServiceImpl.softDeleteClient(id);
 
         Status statusInactive = clientRepository.findById(id).get().getStatus();
-        Assertions.assertEquals(statusInactive, Status.INACTIVE);
+
+        assertEquals(Status.INACTIVE, statusInactive);
+        assertTrue(clientRepository.existsById(id));
+        assertFalse(clientRepository.findByStatusAndId(Status.ACTIVE, id).isPresent());
+
+        Set<ClientDTO> clients = clientServiceImpl.findClients();
+        assertFalse(clients.stream()
+                .anyMatch(client -> client.id().equals(id)));
+    }
+
+    private static void assertThrowsWithType(ExceptionType exceptionType, Executable executable) {
+        RestException ex = Assertions.assertThrows(RestException.class, executable);
+        assertEquals(exceptionType, ex.getExceptionType());
+        assertEquals(exceptionType.getMessage(), ex.getMessage());
     }
 }
