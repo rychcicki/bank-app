@@ -2,18 +2,19 @@ package com.example.bank.client.model;
 
 import com.example.bank.account.model.Account;
 import com.example.bank.auditing.AuditorEntity;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -21,28 +22,22 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
-@ToString(exclude = "account")
-@JsonIgnoreProperties(value = "account")
+@ToString(exclude = {"account", "password"})
 public class Client extends AuditorEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "firstname is mandatory")
     private String firstname;
 
-    @NotBlank(message = "lastname is mandatory")
     private String lastname;
 
-    @NotNull
     private LocalDate birthDate;
 
-    @Email(regexp = "^[^@]+@[^@]+\\.[^@]+$", message = "invalid email address")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -77,5 +72,18 @@ public class Client extends AuditorEntity implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Client client = (Client) o;
+        return Objects.equals(id, client.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

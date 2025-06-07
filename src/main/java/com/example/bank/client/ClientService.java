@@ -11,7 +11,7 @@ public interface ClientService {
 
     Set<ClientDTO> findClients();
 
-    ClientDTO updateClient(Long id, ClientRequest clientRequest);
+    ClientDTO updateClient(Long id, ClientUpdateRequest clientUpdateRequest);
 
-    void deleteClient(Long id);
+    void softDeleteClient(Long id);
 }

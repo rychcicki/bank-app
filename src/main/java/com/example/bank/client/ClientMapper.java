@@ -10,8 +10,7 @@ public interface ClientMapper {
     @Mapping(target = "createdOn", source = "createdOn", dateFormat = "dd-MMM-yyyy HH:mm:ss")
     ClientDTO clientToDto(Client client);
 
-    @Mapping(target = "password", ignore = true)
-    void updateClient(@MappingTarget Client clientToUpdate, ClientRequest clientRequest);
+    void updateClient(@MappingTarget Client clientToUpdate, ClientUpdateRequest clientUpdateRequest);
 
     Client clientRequestToClient(ClientRequest clientRequest);
 }

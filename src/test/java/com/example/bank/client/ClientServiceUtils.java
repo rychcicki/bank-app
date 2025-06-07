@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-class ClientServiceUtils {
+final class ClientServiceUtils {
     static Client clientAdultBuilder() {
         return new Client("Zdzislaw", "Krecina", LocalDate.of(1954, 4, 28),
                 "zdzislaw.krecina@gmail.com", "password",
@@ -24,12 +24,6 @@ class ClientServiceUtils {
         return new Client("Adam", "Malysz", LocalDate.now().minusYears(18),
                 "adam.malusz@gmail.com", "password",
                 new Address("Polanska", "102", "33-450", "Ustron"));
-    }
-
-    static Client clientBelow18YearsOldBuilder() {
-        return new Client("Zdzislaw", "Krecina", LocalDate.now().minusYears(17),
-                "zdzislaw.krecina@gmail.com", "password",
-                new Address("Tatrzanska", "7B", "12-456", "Zywiec"));
     }
 
     static ClientDTO clientDtoWithId5Builder() {
@@ -57,7 +51,7 @@ class ClientServiceUtils {
         return List.of(clientAdultBuilder(), clientExact18YearsOldBuilder());
     }
 
-    static Set<ClientDTO> listOfClientDTO() {
+    static Set<ClientDTO> setOfClientDTO() {
         return Set.of(clientDtoWithId5Builder(), updatedClientExact18YearsOldBuilder());
     }
 }

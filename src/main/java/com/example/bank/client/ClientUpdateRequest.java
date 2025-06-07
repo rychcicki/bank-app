@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record ClientRequest(
+public record ClientUpdateRequest(
         @NotBlank(message = "firstname is mandatory")
         String firstname,
 
@@ -23,8 +23,5 @@ public record ClientRequest(
         String email,
 
         @Valid
-        Address address,
-
-        @NotBlank(message = "password is mandatory")
-        String password) {
+        Address address) {
 }

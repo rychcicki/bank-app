@@ -5,7 +5,6 @@ import com.example.bank.client.model.Role;
 import com.example.bank.client.model.Status;
 import com.example.bank.exception.ExceptionType;
 import com.example.bank.exception.RestException;
-import jakarta.validation.ConstraintViolationException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,70 +28,74 @@ public class ClientServiceImpl implements ClientService {
     private final ClientMapper clientMapper;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${age-of-majority}")
+    @Value("${age-of-majority:21}")
     @Getter
     @Setter(AccessLevel.PROTECTED) // only for testing
-    private Integer majority;
-    private final Status status = Status.ACTIVE;
+    private Integer ageOfMajority;
 
+    @Transactional
     public ClientDTO createClient(ClientRequest clientRequest) {
-        validateBirthDate(clientRequest);
+        if (!isAgeValid(clientRequest.birthDate())) {
+            throw new RestException(ExceptionType.INVALID_MAJORITY_EXCEPTION);
+        }
         Client client = clientMapper.clientRequestToClient(clientRequest);
         client.setRole(Role.USER);
         client.setStatus(Status.ACTIVE);
-        client.setPassword(passwordEncoder.encode((clientRequest.password())));
-        return saveClientAndMapToDto(client);
-    }
-
-    public ClientDTO findClientAsDtoById(Long id) {
-        Client client = clientRepository.findByStatusAndId(status, id)
-                .orElseThrow(() -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
+        client.setPassword(passwordEncoder.encode(clientRequest.password()));
+        try {
+            clientRepository.save(client);
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("Error saving client: {}", client, ex);
+            throw new RestException(ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION, ex);
+        }
         return clientMapper.clientToDto(client);
     }
 
+    @Transactional(readOnly = true)
+    public ClientDTO findClientAsDto(Long id) {
+        Client client = findClient(id);
+        return clientMapper.clientToDto(client);
+    }
+
+    @Transactional(readOnly = true)
     public Client findClient(Long id) {
-        return clientRepository.findByStatusAndId(status, id)
+        return clientRepository.findByStatusAndId(Status.ACTIVE, id)
                 .orElseThrow(() -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
     }
 
+    @Transactional(readOnly = true)
     public Set<ClientDTO> findClients() {
-        return clientRepository.findAllByStatus(status).stream()
+        return clientRepository.findAllByStatus(Status.ACTIVE).stream()
                 .map(clientMapper::clientToDto)
                 .collect(Collectors.toSet());
     }
 
-    public ClientDTO updateClient(Long id, ClientRequest clientRequest) {
-        validateBirthDate(clientRequest);
-        Client client = clientRepository.findByStatusAndId(status, id)
-                .orElseThrow(() -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
-        clientMapper.updateClient(client, clientRequest);
-        return saveClientAndMapToDto(client);
-    }
-
-    public void deleteClient(Long id) {
-        Client client = clientRepository.findByStatusAndId(status, id)
-                .orElseThrow(() -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
-        client.setStatus(Status.INACTIVE);
-        clientRepository.save(client);
-        log.info("Client has been successfully deleted.");
-    }
-
-    private void validateBirthDate(ClientRequest clientRequest) {
-        int years = Period.between(clientRequest.birthDate(), LocalDate.now())
-                .getYears();
-        if (years < getMajority()) {
+    @Transactional
+    public ClientDTO updateClient(Long id, ClientUpdateRequest clientUpdateRequest) {
+        if (!isAgeValid(clientUpdateRequest.birthDate())) {
             throw new RestException(ExceptionType.INVALID_MAJORITY_EXCEPTION);
         }
-    }
-
-    private ClientDTO saveClientAndMapToDto(Client client) {
+        Client client = findClient(id);
+        clientMapper.updateClient(client, clientUpdateRequest);
         try {
-            clientRepository.save(client);
-        } catch (ConstraintViolationException ex) {
-            throw new RestException(ExceptionType.INVALID_REQUEST_EXCEPTION);
+            clientRepository.flush();
         } catch (DataIntegrityViolationException ex) {
-            throw new RestException(ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION);
+            log.warn("Error saving client: {}", client, ex);
+            throw new RestException(ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION, ex);
         }
         return clientMapper.clientToDto(client);
+    }
+
+    @Transactional
+    public void softDeleteClient(Long id) {
+        Client client = findClient(id);
+        client.setStatus(Status.INACTIVE);
+        log.info("Client with id {} has been deactivated (soft delete).", id);
+    }
+
+    private boolean isAgeValid(LocalDate birthDate) {
+        LocalDate dateOfMajority = birthDate.plusYears(ageOfMajority);
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        return dateOfMajority.isBefore(tomorrow);
     }
 }
