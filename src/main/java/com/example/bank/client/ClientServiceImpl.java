@@ -35,7 +35,9 @@ public class ClientServiceImpl implements ClientService {
 
     @Transactional
     public ClientDTO createClient(ClientRequest clientRequest) {
-        validateAge(clientRequest.birthDate());
+        if (!isAgeValid(clientRequest.birthDate())) {
+            throw new RestException(ExceptionType.INVALID_MAJORITY_EXCEPTION);
+        }
         Client client = clientMapper.clientRequestToClient(clientRequest);
         client.setRole(Role.USER);
         client.setStatus(Status.ACTIVE);
@@ -43,6 +45,7 @@ public class ClientServiceImpl implements ClientService {
         try {
             clientRepository.save(client);
         } catch (DataIntegrityViolationException ex) {
+            log.warn("Error saving client: {}", client, ex);
             throw new RestException(ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION, ex);
         }
         return clientMapper.clientToDto(client);
@@ -69,12 +72,15 @@ public class ClientServiceImpl implements ClientService {
 
     @Transactional
     public ClientDTO updateClient(Long id, ClientUpdateRequest clientUpdateRequest) {
-        validateAge(clientUpdateRequest.birthDate());
+        if (!isAgeValid(clientUpdateRequest.birthDate())) {
+            throw new RestException(ExceptionType.INVALID_MAJORITY_EXCEPTION);
+        }
         Client client = findClient(id);
         clientMapper.updateClient(client, clientUpdateRequest);
         try {
             clientRepository.flush();
         } catch (DataIntegrityViolationException ex) {
+            log.warn("Error saving client: {}", client, ex);
             throw new RestException(ExceptionType.CLIENT_ALREADY_EXISTS_EXCEPTION, ex);
         }
         return clientMapper.clientToDto(client);
@@ -87,13 +93,9 @@ public class ClientServiceImpl implements ClientService {
         log.info("Client with id {} has been deactivated (soft delete).", id);
     }
 
-    private void validateAge(LocalDate birthDate) {
-        if (birthDate.isAfter(LocalDate.now())) {
-            throw new RestException(ExceptionType.INVALID_BIRTHDATE_EXCEPTION);
-        }
-
-        if (birthDate.plusYears(ageOfMajority).isAfter(LocalDate.now())) {
-            throw new RestException(ExceptionType.INVALID_MAJORITY_EXCEPTION);
-        }
+    private boolean isAgeValid(LocalDate birthDate) {
+        LocalDate dateOfMajority = birthDate.plusYears(ageOfMajority);
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        return dateOfMajority.isBefore(tomorrow);
     }
 }
