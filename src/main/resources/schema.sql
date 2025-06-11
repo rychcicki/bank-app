@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS ACCOUNT
 CREATE TABLE IF NOT EXISTS REVOKED_TOKEN
 (
     id    int4         NOT NULL DEFAULT NEXT VALUE FOR token_seq PRIMARY KEY,
-    token varchar(255) NULL,
+    token varchar(255) NOT NULL,
     CONSTRAINT token_pkey PRIMARY KEY (id),
     CONSTRAINT token_token_key UNIQUE (token)
 );
