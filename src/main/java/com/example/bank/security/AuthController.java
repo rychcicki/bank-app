@@ -2,7 +2,7 @@ package com.example.bank.security;
 
 import com.example.bank.client.ClientDTO;
 import com.example.bank.client.ClientRequest;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +15,7 @@ class AuthController {
     private final JwtServiceImpl authService;
 
     @PostMapping("/register")
-    ClientDTO register(@RequestBody ClientRequest clientRequest) {
+    ClientDTO register(@RequestBody @Valid ClientRequest clientRequest) {
         return authService.registerClient(clientRequest);
     }
 
@@ -25,12 +25,12 @@ class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    AuthResponse refreshToken(HttpServletRequest request) {
-        return authService.refreshToken(request);
+    AuthResponse refreshToken(@RequestHeader("Authorization") String authHeader) {
+        return authService.refreshToken(authHeader);
     }
 
     @PatchMapping("/change-password")
-    void changePassword(@RequestBody ChangePasswordRequest request, Principal connectedUser) {
+    void changePassword(@RequestBody @Valid ChangePasswordRequest request, Principal connectedUser) {
         authService.changePassword(request, connectedUser);
     }
 }

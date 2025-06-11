@@ -12,12 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final ClientRepository clientRepository;
-    private final Status status = Status.ACTIVE;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         return clientRepository
-                .findByStatusAndEmail(status, username)
+                .findByStatusAndEmail(Status.ACTIVE, username)
                 .orElseThrow(() -> new UsernameNotFoundException("Client not found"));
     }
 }
