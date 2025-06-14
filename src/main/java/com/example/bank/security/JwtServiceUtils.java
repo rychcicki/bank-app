@@ -11,50 +11,52 @@ import org.springframework.http.HttpHeaders;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-class JwtServiceUtils {
+final class JwtServiceUtils {
+    static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
+    private static final int PREVIEW_LENGTH = 15;
+
     static <T> T extractClaim(String token, Function<Claims, T> claimsResolver, String secretKey) {
         final Claims claims = extractAllClaims(token, secretKey);
         return claimsResolver.apply(claims);
     }
 
     static private Claims extractAllClaims(String token, String secretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        SecretKey signInKey = Keys.hmacShaKeyFor(keyBytes);
-
-        return Jwts
-                .parser()
-                .verifyWith(signInKey)
+        return Jwts.parser()
+                .verifyWith(decodeSigningKey(secretKey))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
     static String buildToken(String username, Long expiration, String secretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        SecretKey signInKey = Keys.hmacShaKeyFor(keyBytes);
-        Map<String, Object> claims = new HashMap<>();
-
-        return Jwts
-                .builder()
-                .claims(claims)
+        return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(signInKey, Jwts.SIG.HS256)
+                .signWith(decodeSigningKey(secretKey))
                 .compact();
     }
 
-    static String extractBearerToken(final HttpServletRequest request) {
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return "";
-        }
-        final int bearerTokenPrefixLength = 7;
-        return authHeader.substring(bearerTokenPrefixLength);
+    private static SecretKey decodeSigningKey(String secretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    static Optional<String> extractBearerToken(final HttpServletRequest request) {
+        return extractBearerToken(request.getHeader(HttpHeaders.AUTHORIZATION));
+    }
+
+    static Optional<String> extractBearerToken(final String authHeader) {
+        return Optional.ofNullable(authHeader)
+                .filter(token -> token.startsWith(AUTHORIZATION_HEADER_PREFIX))
+                .map(token -> token.substring(AUTHORIZATION_HEADER_PREFIX.length()));
+    }
+
+    static String previewToken(String token) {
+        return token.length() > PREVIEW_LENGTH ? token.substring(0, PREVIEW_LENGTH) + "..." : token;
     }
 }
