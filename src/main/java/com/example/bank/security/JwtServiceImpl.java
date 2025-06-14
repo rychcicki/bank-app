@@ -5,24 +5,26 @@ import com.example.bank.client.ClientRepository;
 import com.example.bank.client.ClientRequest;
 import com.example.bank.client.ClientService;
 import com.example.bank.client.model.Client;
+import com.example.bank.client.model.Status;
 import com.example.bank.exception.ExceptionType;
 import com.example.bank.exception.RestException;
 import com.example.bank.security.model.RevokedToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.Date;
@@ -38,16 +40,20 @@ public class JwtServiceImpl implements JwtService {
     private final RevokedTokenRepository revokedTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final Long jwtExpiration = 1000 * 60 * 15L;
-    private final Long refreshExpiration = 1000 * 60 * 4L;
 
-    @Value("${age-of-majority}")
+    @Value("${age-of-majority:21}")
     @Getter
     @Setter(AccessLevel.PACKAGE) // only for testing
     private Integer majority;
 
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
+
+    @Value("${application.security.jwt.expiration}")
+    private long jwtExpiration;
+
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshExpiration;
 
     ClientDTO registerClient(ClientRequest clientRequest) {
         return clientService.createClient(clientRequest);
@@ -63,19 +69,19 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public AuthResponse refreshToken(final HttpServletRequest request) {
-        final String token = extractBearerToken(request);
-        if (token.isBlank() || Boolean.FALSE.equals(isTokenValid(token))) {
-            throw new RestException(ExceptionType.INVALID_JWT_EXCEPTION);
-        }
+    public AuthResponse refreshToken(final String authHeader) {
+        String token = extractBearerToken(authHeader)
+                .filter(this::isTokenValid)
+                .orElseThrow(() -> new RestException(ExceptionType.INVALID_JWT_EXCEPTION));
+
         final String username = extractClaim(token, Claims::getSubject, secretKey);
         revokeToken(token);
-        final String refreshToken = buildToken(username, refreshExpiration, secretKey);
-        return new AuthResponse(refreshToken);
+        final String newRefreshToken = buildToken(username, refreshExpiration, secretKey);
+        return new AuthResponse(newRefreshToken);
     }
 
     @Override
-    public Boolean isTokenValid(String token) {
+    public boolean isTokenValid(String token) {
         if (revokedTokenRepository.findByToken(token).isPresent()) return false;
         try {
             return extractClaim(token, Claims::getExpiration, secretKey).after(new Date());
@@ -84,26 +90,35 @@ public class JwtServiceImpl implements JwtService {
         }
     }
 
-    void revokeToken(String jwtToken) {
-        RevokedToken token = new RevokedToken();
-        token.setToken(jwtToken);
-        revokedTokenRepository.save(token);
+    void revokeToken(String token) {
+        RevokedToken revokedToken = new RevokedToken();
+        revokedToken.setToken(token);
+        try {
+            revokedTokenRepository.save(revokedToken);
+        } catch (DataIntegrityViolationException ex) {
+            String preview = JwtServiceUtils.previewToken(token);
+            log.warn("Token already revoked, preview: {}", preview);
+        }
     }
 
     String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject, secretKey);
     }
 
+    @Transactional
     void changePassword(ChangePasswordRequest request, Principal authenticatedUser) {
-        Client client = (Client) ((UsernamePasswordAuthenticationToken) authenticatedUser).getPrincipal();
-        if (!passwordEncoder.matches(request.currentPassword(), client.getPassword())) {
+        String email = ((UserDetails) ((UsernamePasswordAuthenticationToken) authenticatedUser).getPrincipal())
+                .getUsername();
+        Client client = clientRepository.findByStatusAndEmail(Status.ACTIVE, email)
+                .orElseThrow(() -> new RestException(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION));
+
+        if (!passwordEncoder.matches(request.oldPassword(), client.getPassword())) {
             throw new RestException(ExceptionType.WRONG_PASSWORD_EXCEPTION);
         }
-        if (!request.newPassword().equals(request.confirmationPassword())) {
+        if (!request.newPassword().equals(request.confirmPassword())) {
             throw new RestException(ExceptionType.PASSWORD_NOT_MATCHING_EXCEPTION);
         }
         client.setPassword(passwordEncoder.encode(request.newPassword()));
-        clientRepository.save(client);
         log.info("Password has been successfully changed.");
     }
 }

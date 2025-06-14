@@ -17,33 +17,32 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.example.bank.security.JwtServiceUtils.AUTHORIZATION_HEADER_PREFIX;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtServiceImpl authService;
     private final UserDetailsServiceImpl userDetailsService;
-    private static final String API_REFRESH_TOKEN_PATH = "/api/refresh-token";
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) {
         try {
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            if (authHeader == null || !authHeader.startsWith(AUTHORIZATION_HEADER_PREFIX)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            if (request.getServletPath().contains(API_REFRESH_TOKEN_PATH)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            int bearerTokenPrefixLength = 7;
-            final String token = authHeader.substring(bearerTokenPrefixLength);
-            if (Boolean.FALSE.equals(authService.isTokenValid(token))) {
+            final String token = authHeader.substring(AUTHORIZATION_HEADER_PREFIX.length());
+            if (!authService.isTokenValid(token)) {
+                String preview = JwtServiceUtils.previewToken(token);
+                log.warn("Invalid token received, preview: {}", preview);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Unauthorized - Invalid token\"}");
                 return;
             }
 

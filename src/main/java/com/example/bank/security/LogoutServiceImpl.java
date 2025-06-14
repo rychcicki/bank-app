@@ -22,15 +22,17 @@ public class LogoutServiceImpl implements LogoutHandler, LogoutSuccessHandler {
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication auth) {
-        final String token = extractBearerToken(request);
-        if (!token.isBlank() && Boolean.TRUE.equals(authService.isTokenValid(token))) {
-            authService.revokeToken(token);
-        }
+        extractBearerToken(request)
+                .ifPresent(token -> {
+                    if (authService.isTokenValid(token)) {
+                        authService.revokeToken(token);
+                    }
+                });
+        SecurityContextHolder.clearContext();
     }
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication auth) {
-        SecurityContextHolder.clearContext();
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
         try {
