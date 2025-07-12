@@ -2,21 +2,22 @@ package com.example.bank.transfer.model;
 
 import com.example.bank.auditing.AuditorEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Entity
-@Data
-@EqualsAndHashCode(callSuper = true)
-@SuperBuilder
 @NoArgsConstructor
+@Getter
+@Setter
+@SuperBuilder
+@ToString
 public class TransferHistory extends AuditorEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,21 +30,30 @@ public class TransferHistory extends AuditorEntity {
     @NotNull
     private Long clientId;
 
-    @NotBlank(message = "Account number is mandatory")
     private String accountNumber;
 
-    @NotBlank(message = "External account number is mandatory")
     private String externalAccountNumber;
 
     @NotNull
     private BigDecimal previousBalance;
 
-    @DecimalMin(value = "0.01", message = "Amount must be at least 0.01")
     private BigDecimal amount;
 
     @Column(nullable = false)
     private BigDecimal balance;
 
-    @NotBlank(message = "title of transfer is mandatory")
     private String title;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TransferHistory that = (TransferHistory) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }
