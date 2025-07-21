@@ -75,7 +75,7 @@ class AccountServiceTest {
         when(accountRepository.findByAccountNumber(accountNumber)).thenReturn(Optional.of(account));
         when(accountMapper.accountToDTO(account)).thenReturn(foreignAccountDTO);
 
-        AccountDTO accountByAccountNumber = accountService.findAccountByAccountNumber(accountNumber);
+        AccountDTO accountByAccountNumber = accountService.findAccountAsDTO(accountNumber);
 
         Assertions.assertEquals(foreignAccountDTO, accountByAccountNumber);
     }
@@ -88,7 +88,7 @@ class AccountServiceTest {
         when(accountRepository.findByAccountNumber(accountNumber)).thenReturn(Optional.empty());
 
         RestException exception = Assertions.assertThrows(RestException.class,
-                () -> accountService.findAccountByAccountNumber(accountNumber));
+                () -> accountService.findAccountAsDTO(accountNumber));
 
         Assertions.assertEquals(ExceptionType.ACCOUNT_NOT_FOUND_EXCEPTION.getMessage(), exception.getMessage());
     }
@@ -118,5 +118,15 @@ class AccountServiceTest {
 
         Assertions.assertEquals(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION.getMessage(), exception.getMessage());
         verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @DisplayName("saveAllAccountsTest")
+    @Test
+    void shouldSaveAllAccounts() {
+        when(accountRepository.saveAll(List.of(account))).thenReturn(List.of(account));
+
+        accountService.saveAll(List.of(account));
+
+        verify(accountRepository).saveAll(List.of(account));
     }
 }
