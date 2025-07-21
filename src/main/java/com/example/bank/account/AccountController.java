@@ -34,7 +34,7 @@ class AccountController {
     @GetMapping("{number}")
     @RateLimiter(name = "getAccountByAccountNumber")
     AccountDTO getAccountByAccountNumber(@PathVariable String number) {
-        return accountService.findAccountByAccountNumber(number);
+        return accountService.findAccountAsDTO(number);
     }
 
     @GetMapping
