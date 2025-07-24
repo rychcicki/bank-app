@@ -65,11 +65,13 @@ public class AccountService {
         };
     }
 
+    @Transactional(readOnly = true)
     public AccountDTO findAccountAsDTO(String accountNumber) {
         Account account = findAccount(accountNumber);
         return accountMapper.accountToDTO(account);
     }
 
+    @Transactional(readOnly = true)
     public Account findAccount(String accountNumber) {
         return accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new RestException(ExceptionType.ACCOUNT_NOT_FOUND_EXCEPTION));
