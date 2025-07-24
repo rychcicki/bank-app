@@ -1,14 +1,15 @@
 package com.example.bank.transfer;
 
+import com.example.bank.client.model.Client;
 import com.example.bank.transfer.export.XlsxTransferHistoryGenerator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 
 @RestController
 @RequestMapping("/transfer")
@@ -19,8 +20,8 @@ class TransferController {
     private final XlsxTransferHistoryGenerator xlsxTransferHistoryGenerator;
 
     @PostMapping("/make-transfer")
-    void bankTransfer(@RequestBody TransferRequest transferRequest, Principal connectedUser) {
-        transferService.processBankTransfer(transferRequest, connectedUser);
+    void bankTransfer(@RequestBody @Valid TransferRequest transferRequest, @AuthenticationPrincipal Client client) {
+        transferService.processBankTransfer(transferRequest, client);
     }
 
     @PostMapping("/generate-transfer-history/{accountNumber}")
