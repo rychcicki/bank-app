@@ -39,6 +39,7 @@ class ClientServiceIT {
     @Autowired
     private ClientRepository clientRepository;
 
+    private final Long expectedNumberOfClients = 4L;
     private final ClientRequest clientRequest = clientRequestBuilder();
     private final ClientUpdateRequest clientUpdateRequest = clientUpdateRequestBuilder();
 
@@ -85,10 +86,10 @@ class ClientServiceIT {
 
     @Test
     void shouldThrowWhenClientNotFound() {
-        Long id = 4L;
+        Long idNotExist = expectedNumberOfClients + 1L;
 
         assertThrowsWithType(ExceptionType.CLIENT_NOT_FOUND_EXCEPTION,
-                () -> clientServiceImpl.findClient(id));
+                () -> clientServiceImpl.findClient(idNotExist));
     }
 
     @Test
@@ -139,12 +140,12 @@ class ClientServiceIT {
     @Test
     void shouldReturnAllClientsAsDtoSet() {
         Set<ClientDTO> clients = clientServiceImpl.findClients();
-        assertEquals(3, clients.size());
+        assertEquals(expectedNumberOfClients, clients.size());
     }
 
     @Test
     void shouldReturnEmptySetWhenAllClientsSoftDeleted() {
-        Set.of(1L, 2L, 3L).forEach(clientServiceImpl::softDeleteClient);
+        Set.of(1L, 2L, 3L, 4L).forEach(clientServiceImpl::softDeleteClient);
 
         Set<ClientDTO> clients = clientServiceImpl.findClients();
         assertTrue(clients.isEmpty());

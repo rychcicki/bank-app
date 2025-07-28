@@ -30,6 +30,8 @@ class AccountControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
+    private final int expectedNumberOfClients = 4;
+
     @Test
     @WithMockUser(username = "user", authorities = "USER")
     void shouldCreateMyBankAccountAndReturnAccountDtoForUser() throws Exception {
@@ -103,7 +105,7 @@ class AccountControllerIT {
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$").isNotEmpty(),
-                        jsonPath("$", hasSize(3))
+                        jsonPath("$", hasSize(expectedNumberOfClients))
                 );
     }
 

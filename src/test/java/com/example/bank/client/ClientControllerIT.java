@@ -33,9 +33,9 @@ class ClientControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    private String adminToken;
-
     private static final String CLIENT_NOT_FOUND_MESSAGE = "Client not found in database";
+    private final int expectedNumberOfClients = 4;
+    private String adminToken;
 
     @BeforeAll
     void authenticateAdminAndRetrieveJwt() throws Exception {
@@ -140,7 +140,7 @@ class ClientControllerIT {
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$").isNotEmpty(),
-                        jsonPath("$", hasSize(3))
+                        jsonPath("$", hasSize(expectedNumberOfClients))
                 );
     }
 
