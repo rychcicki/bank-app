@@ -2,6 +2,7 @@ package com.example.bank.transfer;
 
 import com.example.bank.account.AccountService;
 import com.example.bank.account.model.Account;
+import com.example.bank.client.ClientService;
 import com.example.bank.client.model.Client;
 import com.example.bank.client.model.Role;
 import com.example.bank.exception.ExceptionType;
@@ -25,6 +26,7 @@ public class TransferService {
     private final TransferHistoryRepository transferHistoryRepository;
     private final RateClient rateClient;
     private final AccountService accountService;
+    private final ClientService clientServiceImpl;
 
     @Transactional
     void processBankTransfer(TransferRequest transferRequest, Client client) {
@@ -46,9 +48,14 @@ public class TransferService {
         logTransferDetails(senderAmountDelta, senderAccount, receiverAccount);
     }
 
-    private void authorizeClient(Client client, Account senderAccount) {
+    private void authorizeClient(Client authClient, Account senderAccount) {
+        Client clientFromDb = clientServiceImpl.findClient(authClient.getId());
+        if (clientFromDb.getRole() == Role.ADMIN) {
+            return;
+        }
+
         Long senderId = senderAccount.getClient().getId();
-        if (!senderId.equals(client.getId()) && client.getRole() != Role.ADMIN) {
+        if (!senderId.equals(clientFromDb.getId())) {
             throw new RestException(ExceptionType.INVALID_REQUEST_EXCEPTION);
         }
     }
