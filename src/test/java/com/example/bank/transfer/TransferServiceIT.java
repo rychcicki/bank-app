@@ -25,11 +25,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
-import java.util.Map;
 
-import static com.example.bank.transfer.TransferServiceITUtils.*;
+import static com.example.bank.transfer.TransferServiceUtils.*;
+import static java.math.RoundingMode.HALF_EVEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -59,6 +58,7 @@ class TransferServiceIT {
     private Client senderUser;
     private Client admin;
     private BigDecimal senderAmountDelta;
+    private static final int SCALE_RATE = 4;
 
     @BeforeEach
     void setUpInputsAndRates() {
@@ -68,15 +68,7 @@ class TransferServiceIT {
         senderUser = senderAccount.getClient();
         admin = defaultAdmin();
 
-        Map<Currency, BigDecimal> rates = Map.of(
-                Currency.USD, BigDecimal.valueOf(3.7796),
-                Currency.AUD, BigDecimal.valueOf(2.4526),
-                Currency.EUR, BigDecimal.valueOf(4.2933),
-                Currency.CHF, BigDecimal.valueOf(4.6221),
-                Currency.GBP, BigDecimal.valueOf(4.9893),
-                Currency.NOK, BigDecimal.valueOf(0.3925)
-        );
-        rates.forEach((currency, mid) -> {
+        RATES.forEach((currency, mid) -> {
             RateResponse response = new RateResponse("A", currency.name(), currency.name(),
                     List.of(new Rates("0", currency.name(), mid)));
             when(rateClient.getCurrencyRate(currency)).thenReturn(response);
@@ -89,8 +81,8 @@ class TransferServiceIT {
                 rateClient.getCurrencyRate(receiverAccount.getCurrency()).rates().getFirst().mid();
 
         senderAmountDelta = transferRequest.amount()
-                .multiply(receiverRate.divide(senderRate, 4, RoundingMode.HALF_EVEN))
-                .setScale(2, RoundingMode.HALF_EVEN);
+                .multiply(receiverRate.divide(senderRate, SCALE_RATE, HALF_EVEN))
+                .setScale(SCALE, HALF_EVEN);
     }
 
     @Test
