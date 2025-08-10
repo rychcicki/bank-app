@@ -65,15 +65,26 @@ public class AccountService {
         };
     }
 
-    public AccountDTO findAccountByAccountNumber(String accountNumber) {
-        Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new RestException(ExceptionType.ACCOUNT_NOT_FOUND_EXCEPTION));
+    @Transactional(readOnly = true)
+    public AccountDTO findAccountAsDTO(String accountNumber) {
+        Account account = findAccount(accountNumber);
         return accountMapper.accountToDTO(account);
+    }
+
+    @Transactional(readOnly = true)
+    public Account findAccount(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RestException(ExceptionType.ACCOUNT_NOT_FOUND_EXCEPTION));
     }
 
     public List<AccountDTO> findAllAccounts() {
         return accountRepository.findAll().stream()
                 .map(accountMapper::accountToDTO)
                 .toList();
+    }
+
+    @Transactional
+    public void saveAll(List<Account> accounts) {
+        accountRepository.saveAll(accounts);
     }
 }

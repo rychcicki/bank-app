@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS CLIENT
     firstname     varchar(255) NOT NULL,
     lastname      varchar(255) NOT NULL,
     password      varchar(255) NULL,
-    role          varchar(255) check (role in ('USER', 'ADMIN')),
+    role          varchar(255) check (role in ('USER', 'ADMIN', 'MANAGER')),
     status        varchar(255) check (status in ('ACTIVE', 'INACTIVE')),
     street_name   varchar(255) NULL,
     street_number varchar(255) NULL,

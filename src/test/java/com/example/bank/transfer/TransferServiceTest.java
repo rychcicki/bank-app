@@ -1,40 +1,33 @@
 package com.example.bank.transfer;
 
-import com.example.bank.account.AccountRepository;
+import com.example.bank.account.AccountService;
 import com.example.bank.account.model.Account;
 import com.example.bank.account.model.Currency;
+import com.example.bank.client.ClientService;
 import com.example.bank.client.model.Client;
-import com.example.bank.client.model.Role;
 import com.example.bank.exception.ExceptionType;
 import com.example.bank.exception.RestException;
 import com.example.bank.transfer.feign.RateClient;
 import com.example.bank.transfer.feign.RateResponse;
-import com.example.bank.transfer.feign.Rates;
 import com.example.bank.transfer.model.TransferHistory;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.math.BigDecimal;
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
 
+import static com.example.bank.transfer.TransferServiceUtils.*;
+import static java.math.RoundingMode.HALF_EVEN;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransferServiceTest {
-    @Mock
-    private AccountRepository accountRepository;
-
     @InjectMocks
     private TransferService transferService;
 
@@ -42,155 +35,216 @@ class TransferServiceTest {
     private TransferHistoryRepository transferHistoryRepository;
 
     @Mock
+    private AccountService accountService;
+
+    @Mock
     private RateClient rateClient;
 
-    @Captor
-    ArgumentCaptor<List<Account>> accountsCaptor;
+    @Mock
+    private ClientService clientService;
 
-    @Captor
-    ArgumentCaptor<List<TransferHistory>> historiesCaptor;
+    private static final int SCALE_RATE = 4;
 
-    @ParameterizedTest
-    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransfer")
-    void shouldThrowRestExceptionWhenAuthenticatedUserIsNotOwnerOfSenderAccount(Account senderAccount,
-                                                                                Account receiverAccount) {
-        TransferRequest transferRequest = new TransferRequest("PL123456789", "EN123",
-                BigDecimal.valueOf(10), "Money for nothing");
-        Principal authenticatedUser = new UsernamePasswordAuthenticationToken(receiverAccount.getClient(), null);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransferDifferentCurrencies")
+    void shouldThrowRestExceptionWhenSenderIsNotAdminOrAccountOwner(String scenarioMethod,
+                                                                    TransferRequest transferRequest,
+                                                                    Account senderAccount, Account receiverAccount,
+                                                                    RateResponse unusedSenderRateResponse,
+                                                                    RateResponse unusedReceiverRateResponse) {
+        Client unauthorizedUser = defaultUnauthorizedClient();
 
-        when(accountRepository.findByAccountNumber(transferRequest.senderAccountNumber()))
-                .thenReturn(Optional.of(senderAccount));
-        when(accountRepository.findByAccountNumber(transferRequest.receiverAccountNumber()))
-                .thenReturn(Optional.of(receiverAccount));
+        when(accountService.findAccount(transferRequest.senderAccountNumber())).thenReturn(senderAccount);
+        when(accountService.findAccount(transferRequest.receiverAccountNumber())).thenReturn(receiverAccount);
+        when(clientService.findClient(unauthorizedUser.getId())).thenReturn(unauthorizedUser);
 
-        RestException exception = Assertions.assertThrows(RestException.class,
-                () -> transferService.processBankTransfer(transferRequest, authenticatedUser));
-        Assertions.assertEquals(exception.getMessage(), ExceptionType.INVALID_REQUEST_EXCEPTION.getMessage());
+        assertThatThrownBy(() -> transferService.processBankTransfer(transferRequest, unauthorizedUser))
+                .isInstanceOf(RestException.class)
+                .hasMessage(ExceptionType.INVALID_REQUEST_EXCEPTION.getMessage());
+
+        verify(accountService, never()).saveAll(anyList());
+        verifyNoInteractions(transferHistoryRepository, rateClient);
+
     }
 
-    @ParameterizedTest
-    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransfer")
-    void shouldThrowRestExceptionWhenSenderAccountNotFound(Account senderAccount) {
-        TransferRequest transferRequest = new TransferRequest("PL123456789", "EN123",
-                BigDecimal.valueOf(10), "Money for nothing");
-        Principal authenticatedUser = new UsernamePasswordAuthenticationToken(senderAccount.getClient(), null);
-
-        when(accountRepository.findByAccountNumber(transferRequest.senderAccountNumber()))
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransferDifferentCurrencies")
+    void shouldThrowRestExceptionWhenSenderAccountNotFound(String scenarioMethod, TransferRequest transferRequest,
+                                                           Account senderAccount,
+                                                           Account ususedReceiverAccount,
+                                                           RateResponse unusedSenderRateResponse,
+                                                           RateResponse unusedReceiverRateResponse) {
+        when(accountService.findAccount(transferRequest.senderAccountNumber()))
                 .thenThrow(new RestException(ExceptionType.ACCOUNT_NOT_FOUND_EXCEPTION));
 
-        RestException exception = Assertions.assertThrows(RestException.class,
-                () -> transferService.processBankTransfer(transferRequest, authenticatedUser));
-        Assertions.assertEquals(exception.getMessage(), ExceptionType.ACCOUNT_NOT_FOUND_EXCEPTION.getMessage());
+        assertThatThrownBy(() -> transferService.processBankTransfer(transferRequest, senderAccount.getClient()))
+                .isInstanceOf(RestException.class)
+                .hasMessage(ExceptionType.ACCOUNT_NOT_FOUND_EXCEPTION.getMessage());
+
+        verify(accountService, never()).saveAll(anyList());
+        verifyNoInteractions(transferHistoryRepository, rateClient);
     }
 
-    @ParameterizedTest
-    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransfer")
-    void shouldThrowRestExceptionWhenSenderBalanceIsInsufficient(Account senderAccount, Account receiverAccount,
-                                                                 TransferHistory senderHistory,
-                                                                 TransferHistory receiverHistory) {
-        TransferRequest transferRequest = new TransferRequest("PL123456789", "EN123",
-                BigDecimal.valueOf(500), "Money for nothing");
-        Principal authenticatedUser = new UsernamePasswordAuthenticationToken(senderAccount.getClient(), null);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransferInsufficientBalance")
+    void shouldThrowRestExceptionWhenSenderBalanceIsInsufficient(String scenarioMethod,
+                                                                 TransferRequest transferRequestTooLargeAmount,
+                                                                 Account senderAccount, Account receiverAccount,
+                                                                 RateResponse rateResponse) {
+        Client authenticatedUser = senderAccount.getClient();
 
-        Rates rateUsd = new Rates("2", "USD", BigDecimal.valueOf(4.29));
-        List<Rates> rateUsdList = List.of(rateUsd);
-        RateResponse rateResponseUsd = new RateResponse("A", "US Dollar", "USD", rateUsdList);
+        when(accountService.findAccount(transferRequestTooLargeAmount.senderAccountNumber())).thenReturn(senderAccount);
+        when(accountService.findAccount(transferRequestTooLargeAmount.receiverAccountNumber())).thenReturn(receiverAccount);
+        when(clientService.findClient(authenticatedUser.getId())).thenReturn(authenticatedUser);
+        when(rateClient.getCurrencyRate(any(Currency.class))).thenReturn(rateResponse);
 
-        senderAccount.setAccountNumber(transferRequest.senderAccountNumber());
-        receiverAccount.setAccountNumber(transferRequest.receiverAccountNumber());
-        senderHistory.setAccountNumber(transferRequest.senderAccountNumber());
-        receiverHistory.setAccountNumber(transferRequest.receiverAccountNumber());
+        assertThatThrownBy(() -> transferService.processBankTransfer(transferRequestTooLargeAmount, authenticatedUser))
+                .isInstanceOf(RestException.class)
+                .hasMessage(ExceptionType.BALANCE_INSUFFICIENT_EXCEPTION.getMessage());
 
-        when(accountRepository.findByAccountNumber(transferRequest.senderAccountNumber()))
-                .thenReturn(Optional.of(senderAccount));
-        when(accountRepository.findByAccountNumber(transferRequest.receiverAccountNumber()))
-                .thenReturn(Optional.of(receiverAccount));
-        when(rateClient.getCurrencyRate(Currency.USD)).thenReturn(rateResponseUsd);
+        verify(accountService, never()).saveAll(anyList());
+        verifyNoInteractions(transferHistoryRepository);
 
-        RestException exception = Assertions.assertThrows(RestException.class,
-                () -> transferService.processBankTransfer(transferRequest, authenticatedUser));
-        Assertions.assertEquals(exception.getMessage(), ExceptionType.BALANCE_INSUFFICIENT_EXCEPTION.getMessage());
     }
 
-    @ParameterizedTest
-    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransfer")
-    void shouldProcessBankTransferWhenAccountsAndBalanceAreValid(Account senderAccount, Account receiverAccount,
-                                                                 TransferHistory senderHistory,
-                                                                 TransferHistory receiverHistory) {
-        TransferRequest transferRequest = new TransferRequest("PL123456789", "EN123",
-                BigDecimal.valueOf(73.21), "Money for nothing");
-        Principal authenticatedUser = new UsernamePasswordAuthenticationToken(senderAccount.getClient(), null);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransferDifferentCurrencies")
+    void shouldProcessTransferWhenAccountsAndBalanceAreValid(String scenarioMethod,
+                                                             TransferRequest transferRequest,
+                                                             Account senderAccount, Account receiverAccount,
+                                                             RateResponse senderRateResponse,
+                                                             RateResponse receiverRateResponse) {
+        Client authenticatedUser = senderAccount.getClient();
+        BigDecimal senderAmountDelta =
+                calculateSenderAmountDelta(transferRequest, senderRateResponse, receiverRateResponse);
+        TransferHistory senderHistory =
+                buildExpectedSenderTransferHistory(transferRequest, senderAccount, receiverAccount, senderAmountDelta);
+        TransferHistory receiverHistory =
+                buildExpectedReceiverTransferHistory(transferRequest, receiverAccount, senderAccount);
 
-        senderAccount.setAccountNumber(transferRequest.senderAccountNumber());
-        receiverAccount.setAccountNumber(transferRequest.receiverAccountNumber());
-
-        Rates rateUsd = new Rates("2", "USD", BigDecimal.valueOf(4.0944));
-        List<Rates> rateUsdList = List.of(rateUsd);
-        RateResponse rateResponseUsd = new RateResponse("A", "US Dollar", "USD", rateUsdList);
-
-        senderAccount.setAccountNumber(transferRequest.senderAccountNumber());
-        receiverAccount.setAccountNumber(transferRequest.receiverAccountNumber());
-
-        senderHistory.setAccountNumber(transferRequest.senderAccountNumber());
-        receiverHistory.setAccountNumber(transferRequest.receiverAccountNumber());
-        List<TransferHistory> transferHistoryList = List.of(senderHistory, receiverHistory);
-
-        when(accountRepository.findByAccountNumber(transferRequest.senderAccountNumber()))
-                .thenReturn(Optional.of(senderAccount));
-        when(accountRepository.findByAccountNumber(transferRequest.receiverAccountNumber()))
-                .thenReturn(Optional.of(receiverAccount));
-        when(accountRepository.saveAll(List.of(senderAccount, receiverAccount)))
-                .thenReturn(List.of(senderAccount, receiverAccount));
-        when(transferHistoryRepository.saveAll(anyList())).thenReturn(transferHistoryList);
-
-        when(rateClient.getCurrencyRate(Currency.USD)).thenReturn(rateResponseUsd);
+        when(accountService.findAccount(transferRequest.senderAccountNumber())).thenReturn(senderAccount);
+        when(accountService.findAccount(transferRequest.receiverAccountNumber())).thenReturn(receiverAccount);
+        when(clientService.findClient(authenticatedUser.getId())).thenReturn(authenticatedUser);
+        when(rateClient.getCurrencyRate(senderAccount.getCurrency())).thenReturn(senderRateResponse);
+        when(rateClient.getCurrencyRate(receiverAccount.getCurrency())).thenReturn(receiverRateResponse);
 
         transferService.processBankTransfer(transferRequest, authenticatedUser);
 
-        verify(accountRepository).findByAccountNumber(transferRequest.senderAccountNumber());
-        verify(accountRepository).findByAccountNumber(transferRequest.receiverAccountNumber());
-
-        verify(accountRepository).saveAll(accountsCaptor.capture());
-        List<Account> savedAccounts = accountsCaptor.getValue();
-        TransferServiceAssert.assertThat().hasValidAccounts(savedAccounts, transferRequest);
-
-        verify(transferHistoryRepository).saveAll(historiesCaptor.capture());
-        List<TransferHistory> savedHistories = historiesCaptor.getValue();
-        TransferServiceAssert.assertThat().hasValidTransferHistories(savedHistories, transferRequest, senderAccount,
-                receiverAccount);
+        verify(accountService).findAccount(transferRequest.senderAccountNumber());
+        verify(accountService).findAccount(transferRequest.receiverAccountNumber());
+        verify(rateClient).getCurrencyRate(senderAccount.getCurrency());
+        verify(rateClient).getCurrencyRate(receiverAccount.getCurrency());
+        verifyAccountsAndHistoriesSavedCorrectly(senderAccount, receiverAccount, senderHistory, receiverHistory);
     }
 
-    @ParameterizedTest
-    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransfer")
-    void shouldProcessBankTransferWhenCurrenciesAreTheEqualAndUserIsAdmin(Account senderAccount, Account receiverAccount,
-                                                                          TransferHistory senderHistory,
-                                                                          TransferHistory receiverHistory) {
-        TransferRequest transferRequest = new TransferRequest("PL123456789", "EN123",
-                BigDecimal.valueOf(48.92), "Money for nothing");
-        Client admin = receiverAccount.getClient();
-        admin.setRole(Role.ADMIN);
-        Principal authenticatedUser = new UsernamePasswordAuthenticationToken(admin, null);
+    private static BigDecimal calculateSenderAmountDelta(TransferRequest transferRequest,
+                                                         RateResponse senderRateResponse,
+                                                         RateResponse receiverRateResponse) {
+        BigDecimal midSender = senderRateResponse.rates().getFirst().mid();
+        BigDecimal midSReceiver = receiverRateResponse.rates().getFirst().mid();
+        return transferRequest.amount()
+                .multiply(midSReceiver.divide(midSender, SCALE_RATE, HALF_EVEN))
+                .setScale(SCALE, HALF_EVEN);
+    }
 
-        senderAccount.setCurrency(Currency.CHF);
-        senderAccount.setAccountNumber(transferRequest.senderAccountNumber());
-        receiverAccount.setCurrency(Currency.CHF);
-        receiverAccount.setAccountNumber(transferRequest.receiverAccountNumber());
-        senderHistory.setAccountNumber(transferRequest.senderAccountNumber());
-        receiverHistory.setAccountNumber(transferRequest.receiverAccountNumber());
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransferSamePlnCurrency")
+    void shouldProcessTransferWhenAccountsAndBalanceAreValidInPlnCurrency(String scenarioMethod,
+                                                                          TransferRequest transferRequest,
+                                                                          Account senderAccount,
+                                                                          Account receiverAccount) {
+        Client authenticatedUser = senderAccount.getClient();
+        BigDecimal senderAmountDelta = transferRequest.amount();
+        TransferHistory senderHistory =
+                buildExpectedSenderTransferHistory(transferRequest, senderAccount, receiverAccount, senderAmountDelta);
+        TransferHistory receiverHistory =
+                buildExpectedReceiverTransferHistory(transferRequest, receiverAccount, senderAccount);
 
-        when(accountRepository.findByAccountNumber(transferRequest.senderAccountNumber()))
-                .thenReturn(Optional.of(senderAccount));
-        when(accountRepository.findByAccountNumber(transferRequest.receiverAccountNumber()))
-                .thenReturn(Optional.of(receiverAccount));
-        when(accountRepository.saveAll(anyList())).thenReturn(List.of(senderAccount, receiverAccount));
-        when(transferHistoryRepository.saveAll(anyList())).thenReturn(List.of(senderHistory, receiverHistory));
+        when(accountService.findAccount(transferRequest.senderAccountNumber())).thenReturn(senderAccount);
+        when(accountService.findAccount(transferRequest.receiverAccountNumber())).thenReturn(receiverAccount);
+        when(clientService.findClient(authenticatedUser.getId())).thenReturn(authenticatedUser);
 
         transferService.processBankTransfer(transferRequest, authenticatedUser);
 
-        verify(rateClient, never()).getCurrencyRate(any());
-        verify(accountRepository).findByAccountNumber(transferRequest.senderAccountNumber());
-        verify(accountRepository).findByAccountNumber(transferRequest.receiverAccountNumber());
-        verify(accountRepository).saveAll(anyList());
-        verify(transferHistoryRepository).saveAll(anyList());
+        verify(accountService).findAccount(transferRequest.senderAccountNumber());
+        verify(accountService).findAccount(transferRequest.receiverAccountNumber());
+        verifyNoInteractions(rateClient);
+        verifyAccountsAndHistoriesSavedCorrectly(senderAccount, receiverAccount, senderHistory, receiverHistory);
+
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransferPlnToOtherCurrency")
+    void shouldProcessTransferWhenAccountsAndBalanceAreValidPlnToForeignCurrency(String scenarioMethod,
+                                                                                 TransferRequest transferRequest,
+                                                                                 Account senderAccount,
+                                                                                 Account receiverAccount,
+                                                                                 RateResponse rateResponse) {
+        Client authenticatedUser = senderAccount.getClient();
+        BigDecimal senderAmountDelta = transferRequest.amount().multiply(rateResponse.rates().getFirst().mid());
+        TransferHistory senderHistory =
+                buildExpectedSenderTransferHistory(transferRequest, senderAccount, receiverAccount, senderAmountDelta);
+        TransferHistory receiverHistory =
+                buildExpectedReceiverTransferHistory(transferRequest, receiverAccount, senderAccount);
+
+        when(accountService.findAccount(transferRequest.senderAccountNumber())).thenReturn(senderAccount);
+        when(accountService.findAccount(transferRequest.receiverAccountNumber())).thenReturn(receiverAccount);
+        when(clientService.findClient(authenticatedUser.getId())).thenReturn(authenticatedUser);
+        when(rateClient.getCurrencyRate(receiverAccount.getCurrency())).thenReturn(rateResponse);
+
+        transferService.processBankTransfer(transferRequest, authenticatedUser);
+
+        verify(accountService).findAccount(transferRequest.senderAccountNumber());
+        verify(accountService).findAccount(transferRequest.receiverAccountNumber());
+        verify(rateClient).getCurrencyRate(receiverAccount.getCurrency());
+        verify(rateClient, never()).getCurrencyRate(Currency.PLN);
+        verifyAccountsAndHistoriesSavedCorrectly(senderAccount, receiverAccount, senderHistory, receiverHistory);
+
+    }
+
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("com.example.bank.transfer.SourceMethodsForTransferTest#argumentsForTransferSameCurrency")
+    void shouldProcessTransferWhenCurrenciesAreEqualAndUserIsAdmin(String scenarioMethod,
+                                                                   TransferRequest transferRequest,
+                                                                   Account senderAccount,
+                                                                   Account receiverAccount,
+                                                                   RateResponse unusedRateResponse) {
+        Client admin = TransferServiceUtils.defaultAdmin();
+        BigDecimal senderAmountDelta = transferRequest.amount();
+        TransferHistory senderHistory =
+                buildExpectedSenderTransferHistory(transferRequest, senderAccount, receiverAccount, senderAmountDelta);
+        TransferHistory receiverHistory =
+                buildExpectedReceiverTransferHistory(transferRequest, receiverAccount, senderAccount);
+
+        when(accountService.findAccount(transferRequest.senderAccountNumber())).thenReturn(senderAccount);
+        when(accountService.findAccount(transferRequest.receiverAccountNumber())).thenReturn(receiverAccount);
+        when(clientService.findClient(admin.getId())).thenReturn(admin);
+
+        transferService.processBankTransfer(transferRequest, admin);
+
+        verify(accountService).findAccount(transferRequest.senderAccountNumber());
+        verify(accountService).findAccount(transferRequest.receiverAccountNumber());
+        verifyNoInteractions(rateClient);
+        verifyAccountsAndHistoriesSavedCorrectly(senderAccount, receiverAccount, senderHistory, receiverHistory);
+    }
+
+    private void verifyAccountsAndHistoriesSavedCorrectly(Account senderAccount, Account receiverAccount,
+                                                          TransferHistory senderHistory, TransferHistory receiverHistory) {
+        verify(accountService).saveAll(argThat(savedAccounts -> {
+            assertThat(savedAccounts)
+                    .hasSize(2)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactlyInAnyOrder(senderAccount, receiverAccount);
+            return true;
+        }));
+
+        verify(transferHistoryRepository).saveAll(argThat(savedHistories -> {
+            assertThat(savedHistories)
+                    .hasSize(2)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("createdOn", "updateOn")
+                    .containsExactlyInAnyOrder(senderHistory, receiverHistory);
+            return true;
+        }));
     }
 }

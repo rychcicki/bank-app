@@ -19,7 +19,9 @@ public enum ExceptionType {
     WRONG_PASSWORD_EXCEPTION("009", "Wrong password", HttpStatus.UNAUTHORIZED),
     PASSWORD_NOT_MATCHING_EXCEPTION("010", "Passwords are not the same", HttpStatus.UNAUTHORIZED),
     BALANCE_INSUFFICIENT_EXCEPTION("011", "Insufficient balance to complete the transaction",
-            HttpStatus.PAYMENT_REQUIRED);
+            HttpStatus.PAYMENT_REQUIRED),
+    EXCHANGE_RATE_NOT_AVAILABLE_EXCEPTION("012", "Exchange rate not available",
+            HttpStatus.SERVICE_UNAVAILABLE);
 
     private final String errorCode;
     private final String message;

@@ -1,6 +1,7 @@
 package com.example.bank.context;
 
-import com.example.bank.account.AccountRepository;
+import com.example.bank.account.AccountService;
+import com.example.bank.client.ClientService;
 import com.example.bank.transfer.TransferHistoryRepository;
 import com.example.bank.transfer.TransferService;
 import com.example.bank.transfer.export.XlsxTransferHistoryGenerator;
@@ -38,9 +39,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 })
 public class TransferOwnContext {
     @Bean
-    public TransferService transferService(AccountRepository accountRepository,
-                                           TransferHistoryRepository transferHistoryRepository, RateClient rateClient) {
-        return new TransferService(accountRepository, transferHistoryRepository, rateClient);
+    public TransferService transferService(TransferHistoryRepository transferHistoryRepository, RateClient rateClient,
+                                           ClientService clientService, AccountService accountService) {
+        return new TransferService(transferHistoryRepository, rateClient, accountService, clientService);
     }
 
     @Bean

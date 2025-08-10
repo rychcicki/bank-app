@@ -5,12 +5,15 @@ VALUES ('Mike', 'Wazowski', 'mike.wazowski@gmail.com', '1980-01-28', '{noop}pass
        ('Randal', 'Randal', 'bad.randal@gmail.com', '1970-02-28', '{noop}badpassword', 'USER', 'ACTIVE', 'MonstersEnc',
         11, '01-888', 'Monsters', CURRENT_TIMESTAMP, 2, CURRENT_TIMESTAMP, 2),
        ('Andy', 'Warchol', 'andywarchol@gmail.com', '1960-03-15', '{noop}hardpassword', 'USER', 'ACTIVE', 'MonstersEnc',
-        50, '02-888', 'Monsters', CURRENT_TIMESTAMP, 3, CURRENT_TIMESTAMP, 3);
+        50, '02-888', 'Monsters', CURRENT_TIMESTAMP, 3, CURRENT_TIMESTAMP, 3),
+       ('Someone', 'Stranger', 'someone@gmail.com', '1999-07-11', '{noop}anypassword', 'MANAGER', 'ACTIVE', 'Somewhere',
+        90, '00-911', 'Somewhere', CURRENT_TIMESTAMP, 4, CURRENT_TIMESTAMP, 4);
 
 INSERT INTO ACCOUNT (account_number, currency, type, balance, client_id)
 VALUES ('PL54613983300568639363795256', 'PLN', 'CURRENT_ACCOUNT', 2000, 1),
        ('GB92BARC20038472426896', 'GBP', 'CURRENT_ACCOUNT', 3000, 2),
-       ('DE11500105171841551884', 'EUR', 'CURRENT_ACCOUNT', 500, 3);
+       ('DE11500105171841551884', 'EUR', 'CURRENT_ACCOUNT', 500, 3),
+       ('RS18063447194142709070', 'USD', 'CURRENT_ACCOUNT', 1000, 4);
 
 INSERT INTO REVOKED_TOKEN (token)
 VALUES ('eyJhbGciOiJIUzI1NiJ9.ew0KICAic3ViIjogIjEyMzQ1Njc4OTAiLA0KICAibmFtZSI6ICJBbmlzaCBOYXRoIiwNCiAgImlhdCI6IDE1MT' ||
