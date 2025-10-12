@@ -29,7 +29,7 @@ class TransferControllerIT {
     private MockMvc mockMvc;
 
     private static final String MAKE_TRANSFER_URL = "/transfer/make-transfer";
-    private static final String GENERATE_TRANSFER_HISTORY_URL = "/transfer/generate-transfer-history/{account}";
+    private static final String GENERATE_TRANSFER_HISTORY_URL = "/transfer/generate-transfer-history/{accountNumber}";
     private String adminToken;
     private String userToken;
     private String otherRoleToken;
@@ -134,9 +134,23 @@ class TransferControllerIT {
                         .header(HttpHeaders.AUTHORIZATION, adminToken))
                 .andExpectAll(
                         status().isOk(),
-                        header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE),
+                        header().string(HttpHeaders.CONTENT_TYPE,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
                         header().string(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=Transfer history PL21363593769265669736300815.xlsx"))
+                                "attachment; filename=\"Transfer history PL21363593769265669736300815.xlsx\""))
+                .andReturn();
+    }
+
+    @Test
+    void shouldGenerateXlsxTransferHistoryWhenUser() throws Exception {
+        mockMvc.perform(post(GENERATE_TRANSFER_HISTORY_URL, "PL21363593769265669736300815")
+                        .header(HttpHeaders.AUTHORIZATION, userToken))
+                .andExpectAll(
+                        status().isOk(),
+                        header().string(HttpHeaders.CONTENT_TYPE,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+                        header().string(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"Transfer history PL21363593769265669736300815.xlsx\""))
                 .andReturn();
     }
 

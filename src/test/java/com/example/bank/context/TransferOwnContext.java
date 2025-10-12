@@ -4,7 +4,7 @@ import com.example.bank.account.AccountService;
 import com.example.bank.client.ClientService;
 import com.example.bank.transfer.TransferHistoryRepository;
 import com.example.bank.transfer.TransferService;
-import com.example.bank.transfer.export.XlsxTransferHistoryGenerator;
+import com.example.bank.transfer.export.ExportTransferHistoryService;
 import com.example.bank.transfer.feign.RateClient;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -45,7 +45,7 @@ public class TransferOwnContext {
     }
 
     @Bean
-    XlsxTransferHistoryGenerator xlsxTransferHistoryGenerator(TransferHistoryRepository transferHistoryRepository) {
-        return new XlsxTransferHistoryGenerator(transferHistoryRepository);
+    ExportTransferHistoryService exportTransferHistoryService(TransferHistoryRepository transferHistoryRepository) {
+        return new ExportTransferHistoryService(transferHistoryRepository);
     }
 }
