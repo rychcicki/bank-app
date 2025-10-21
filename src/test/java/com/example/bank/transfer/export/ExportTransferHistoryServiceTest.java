@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static com.example.bank.transfer.export.XlsxTransferHistoryGeneratorUtils.transferHistoryCreator;
+import static com.example.bank.transfer.export.ExportToXlsxSources.HEADER_CELL_TITLES;
+import static com.example.bank.transfer.export.ExportToXlsxSources.SHEET_NAME;
+import static com.example.bank.transfer.export.ExportToXlsxUtils.transferHistoryCreator;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -28,9 +30,6 @@ import static org.mockito.Mockito.when;
 class ExportTransferHistoryServiceTest {
     private static final String ACCOUNT_NUMBER = "PL27722968758620190053098782";
     private static final String INVALID_EMPTY_ACCOUNT_NUMBER = " ";
-    private static final String SHEET_NAME = "Transfer history";
-    private static final List<String> HEADER_CELL_TITLES = List.of(
-            "Created on", "Transfer type", "Bank account number", "Title of transfer", "Amount", "Balance");
 
     @Mock
     private TransferHistoryRepository transferHistoryRepository;
