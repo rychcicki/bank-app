@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-class XlsxTransferHistoryGeneratorUtils {
+final class ExportToXlsxUtils {
     static List<TransferHistory> transferHistoryCreator() {
         final String accountNumber = "PL54613983300568639363795256";
         TransferHistory transferHistory1 = TransferHistory
