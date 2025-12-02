@@ -2,76 +2,127 @@ package com.example.bank.transfer.export;
 
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.util.WorkbookUtil;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
 
-@Getter
-public class WorkbookCreator {
-    static final String transferHistorySheetName = "Transfer history";
-    static final List<String> headerCellTitles = List.of(
-            "Created on", "Transfer type", "Bank account number", "Title of transfer", "Amount", "Balance");
-    private final int horizontalPadding = 200;
-    private final int headerIndex = 0;
-    private final Workbook workbook = new XSSFWorkbook();
+import static java.util.Objects.requireNonNull;
 
-    Sheet createSheetWithHeader(String sheetName, List<String> headerCellTitles) {
-        int sheetIndex = workbook.getSheetIndex(sheetName);
-        if (sheetIndex >= 0) workbook.removeSheetAt(sheetIndex);
-        Sheet sheet = workbook.createSheet(sheetName);
-        createHeaderRow(sheet, headerCellTitles);
-        return sheet;
+final class WorkbookCreator implements Closeable {
+    @Getter
+    private final Workbook workbook;
+    private final ExportCellStyles exportCellStyles;
+
+    WorkbookCreator(Workbook workbook) {
+        this.workbook = requireNonNull(workbook, "workbook cannot be null");
+        this.exportCellStyles = new ExportCellStyles(this.workbook);
     }
 
-    private void createHeaderRow(Sheet sheet, List<String> headerTitles) {
-        Row headerRow = sheet.createRow(headerIndex);
-        CellStyle headerStyle = createStyleForHeader(sheet.getWorkbook());
-        IntStream.range(0, headerTitles.size()).forEach(columnIndex -> {
-            Cell cell = headerRow.createCell(columnIndex);
-            cell.setCellValue(headerTitles.get(columnIndex));
-            cell.setCellStyle(headerStyle);
-        });
+    XlsxSheet createSheet(String sheetName) {
+        sheetName = WorkbookUtil.createSafeSheetName(sheetName, '_');
+        if (workbook.getSheetIndex(sheetName) >= 0) {
+            throw new IllegalArgumentException("Sheet \"" + sheetName + "\" already exists in workbook");
+        }
+        return new XlsxSheet(workbook.createSheet(sheetName), exportCellStyles);
     }
 
-    private CellStyle createStyleForHeader(Workbook workbook) {
-        CellStyle headerStyle = workbook.createCellStyle();
-        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        headerStyle.setAlignment(HorizontalAlignment.CENTER);
-        Font font = workbook.createFont();
-        font.setBold(true);
-        headerStyle.setFont(font);
-        return headerStyle;
+    void write(OutputStream outputStream) throws IOException {
+        workbook.write(outputStream);
     }
 
-    void autoSizeColumns(Sheet sheet, List<String> headerCellTitles) {
-        IntStream.range(0, headerCellTitles.size()).forEach(columnIndex -> {
-            sheet.autoSizeColumn(columnIndex);
-            sheet.setColumnWidth(columnIndex, sheet.getColumnWidth(columnIndex) + horizontalPadding);
-        });
+    @Override
+    public void close() throws IOException {
+        workbook.close();
     }
 
-    CellStyle createDefaultWrapTextStyle(Workbook workbook) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setWrapText(true);
-        return cellStyle;
+    static final class XlsxSheet {
+        private final Sheet sheet;
+        private final ExportCellStyles exportCellStyles;
+        private int rowIndex = 0;
+        private int headerCellsCount = -1;
+
+        XlsxSheet(Sheet sheet, ExportCellStyles exportCellStyles) {
+            this.sheet = sheet;
+            this.exportCellStyles = exportCellStyles;
+        }
+
+        public XlsxRow createRow() {
+            return new XlsxRow(sheet.createRow(rowIndex++), exportCellStyles);
+        }
+
+        public XlsxSheet createStyledHeader(List<String> headerCellTitles) {
+            if (headerCellTitles == null || headerCellTitles.isEmpty()) {
+                throw new IllegalArgumentException("headerCellTitles cannot be null or empty");
+            }
+
+            Row headerRow = sheet.createRow(rowIndex++);
+            IntStream.range(0, headerCellTitles.size())
+                    .forEach(columnIndex -> {
+                        Cell cell = headerRow.createCell(columnIndex);
+                        cell.setCellValue(headerCellTitles.get(columnIndex));
+                        cell.setCellStyle(exportCellStyles.getHeaderCellStyle());
+                    });
+            headerCellsCount = headerCellTitles.size();
+            return this;
+        }
+
+        void adjustColumnWidth() {
+            if (headerCellsCount < 0) {
+                throw new IllegalStateException("createStyledHeader must be called before adjustColumnWidth");
+            }
+            CellStyleUtils.autoSizeColumns(sheet, headerCellsCount);
+        }
     }
 
-    CellStyle createDateTimeCellStyle(Workbook workbook) {
-        String dbFormatPattern = "YYYY-MMM-dd HH:mm:ss";
-        CellStyle style = workbook.createCellStyle();
-        style.setWrapText(true);
-        DataFormat dateTimeFormat = workbook.createDataFormat();
-        style.setDataFormat(dateTimeFormat.getFormat(dbFormatPattern));
-        return style;
-    }
+    static final class XlsxRow {
+        private final Row row;
+        private final ExportCellStyles exportCellStyles;
+        private int cellIndex = 0;
 
-    CellStyle createDecimalCellStyle(Workbook workbook) {
-        String decimalFormatPattern = "#,##0.00";
-        CellStyle decimalStyle = workbook.createCellStyle();
-        DataFormat decimalFormat = workbook.createDataFormat();
-        decimalStyle.setDataFormat(decimalFormat.getFormat(decimalFormatPattern));
-        return decimalStyle;
+        XlsxRow(Row row, ExportCellStyles exportCellStyles) {
+            this.row = row;
+            this.exportCellStyles = exportCellStyles;
+        }
+
+        XlsxRow addValues(List<Object> values) {
+            if (values == null || values.isEmpty()) {
+                throw new IllegalArgumentException("values cannot be null or empty");
+            }
+
+            values.forEach(this::fillCell);
+            return this;
+        }
+
+        void fillCell(Object cellValue) {
+            Cell cell = row.createCell(cellIndex++);
+            CellStyle textStyle = exportCellStyles.getWrappedTextCellStyle();
+            switch (cellValue) {
+                case null -> {
+                    cell.setCellValue("");
+                    cell.setCellStyle(textStyle);
+                }
+                case String name -> {
+                    cell.setCellValue(name);
+                    cell.setCellStyle(textStyle);
+                }
+                case LocalDateTime dateTime -> {
+                    cell.setCellValue(dateTime);
+                    cell.setCellStyle(exportCellStyles.getDateTimeCellStyle());
+                }
+                case Number number -> {
+                    cell.setCellValue(number.doubleValue());
+                    cell.setCellStyle(exportCellStyles.getDecimalCellStyle());
+                }
+                default -> {
+                    cell.setCellValue(cellValue.toString());
+                    cell.setCellStyle(textStyle);
+                }
+            }
+        }
     }
 }

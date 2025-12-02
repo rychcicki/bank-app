@@ -1,7 +1,7 @@
 package com.example.bank.transfer;
 
 import com.example.bank.client.model.Client;
-import com.example.bank.transfer.export.XlsxTransferHistoryGenerator;
+import com.example.bank.transfer.export.ExportTransferHistoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
 class TransferController {
     private final TransferService transferService;
-    private final XlsxTransferHistoryGenerator xlsxTransferHistoryGenerator;
+    private final ExportTransferHistoryService exportTransferHistoryService;
 
     @PostMapping("/make-transfer")
     void bankTransfer(@RequestBody @Valid TransferRequest transferRequest, @AuthenticationPrincipal Client client) {
@@ -25,14 +25,15 @@ class TransferController {
     }
 
     @PostMapping("/generate-transfer-history/{accountNumber}")
-    @ResponseBody
     ResponseEntity<byte[]> generateXlsxTransferHistory(@PathVariable String accountNumber) {
-        byte[] byteArray = xlsxTransferHistoryGenerator.generateXlsxTransferHistory(accountNumber).toByteArray();
-        String fileName = String.format(XlsxTransferHistoryGenerator.FILE_NAME_PATTERN, accountNumber);
+        byte[] byteArray = exportTransferHistoryService.generateXlsxTransferHistory(accountNumber);
+        String fileName = String.format(ExportTransferHistoryService.FILE_NAME_PATTERN, accountNumber)
+                .replaceAll("[\\r\\n\"]", "_");
 
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(byteArray);
     }
 }

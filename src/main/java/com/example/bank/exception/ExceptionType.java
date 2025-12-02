@@ -21,7 +21,8 @@ public enum ExceptionType {
     BALANCE_INSUFFICIENT_EXCEPTION("011", "Insufficient balance to complete the transaction",
             HttpStatus.PAYMENT_REQUIRED),
     EXCHANGE_RATE_NOT_AVAILABLE_EXCEPTION("012", "Exchange rate not available",
-            HttpStatus.SERVICE_UNAVAILABLE);
+            HttpStatus.SERVICE_UNAVAILABLE),
+    TRANSFER_HISTORY_NOT_FOUND("013", "Transfer history not found in database", HttpStatus.NOT_FOUND),;
 
     private final String errorCode;
     private final String message;
