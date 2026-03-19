@@ -11,6 +11,7 @@
 ## Table of contents
 - [Overview](#overview-)
 - [Technology stack](#technology-stack-)
+- [Getting Started](#getting-started-)
 - [API Endpoints](#api-endpoints-)
 - [Testing](#testing-%EF%B8%8F)
 - [Future Enhancements](#future-enhancements-)
@@ -44,6 +45,30 @@ For example for xlsx file *"Transfer history PL41587593093455485451756425"*:
 * Swagger (Open API)
 * JUnit, Mockito, AssertJ
 * JaCoCo
+* Docker / Docker Compose
+
+[Back to top](#table-of-contents)
+
+## Getting Started 🐳
+
+### Prerequisites
+* Docker Desktop
+
+### Run with Docker
+```sh
+docker-compose up --build
+```
+
+Application will be available at:
+```
+http://localhost:8080/bank/swagger-ui.html
+```
+
+### Run locally
+```sh
+mvn spring-boot:run
+```
+> Requires local PostgreSQL with database `marcin`
 
 [Back to top](#table-of-contents)
 
